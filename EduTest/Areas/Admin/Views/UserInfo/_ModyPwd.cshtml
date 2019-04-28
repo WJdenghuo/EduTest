@@ -1,0 +1,53 @@
+﻿@model Edu.Entity.UserInfo
+ 
+@using (Html.BeginForm("ModyPwd", "UserInfo", FormMethod.Post, new { @id = "fm", @class = "form-horizontal", enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(p => p.ID)
+    @Html.Hidden("refUrl", ViewBag.refUrl as object)
+    <div class="form-group">
+        <label for="UserName" class="col-sm-3 control-label">用户名</label>
+        <div class="col-sm-6">
+            @Html.TextBoxFor(p => p.UserName, new { @class = "form-control" })
+
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="Pwd" class="col-sm-3 control-label">密 码</label>
+        <div class="col-sm-6">
+            @Html.PasswordFor(p => p.Pwd, new { @class = "form-control", checktype = "required", requiredmessage = "*" })
+
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="Pwd" class="col-sm-3 control-label">重复密码</label>
+        <div class="col-sm-6">
+            <input type="password" id="rePwd" name="rePwd" class="form-control" />
+        </div>
+    </div>
+   
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#rePwd").blur(function () {
+            var objDv = $(this).parent();
+            if ($("#rePwd").val() != $("#Pwd").val()) {
+                objDv.parent().addClass("has-error");
+                $(objDv).append("<span id='valierr' class='help-block'>错误</span>")
+            }
+            else {
+                var objDv = $(this).parent();
+                objDv.parent().addClass("has-success");
+            }
+        });
+        $("#rePwd").focus(function () {
+            var objDv = $(this).parent();
+            objDv.parent().removeClass("has-error");
+            objDv.parent().removeClass("has-success");
+
+            $(objDv).find(".help-block").remove();
+        });
+    })
+</script>
+
+

@@ -1,0 +1,175 @@
+﻿@model Edu.Entity.UserInfo
+
+<div class="ibox">
+    <div class="ibox-title">
+        <h5>用户信息 </h5>
+        <a class="fullscreen-link pull-right">
+            <i class="fa fa-expand"></i>
+        </a>
+    </div>
+    <div class="ibox-content">
+        <div class="row">
+            <div class="col-xs-12">
+                @using (Html.BeginForm("User_Op", "UserInfo", FormMethod.Post, new { @id = "fm", @class = "form-horizontal", enctype = "multipart/form-data" }))
+                {
+                    @Html.HiddenFor(p => p.ID)
+                    @Html.Hidden("refUrl", ViewBag.refUrl as object)
+                    <div class="form-group">
+                        <label for="UserName" class="col-sm-3 control-label">用户名</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(p => p.UserName, new { @class = "form-control", placeholder = "输入5~16位英文字母，数字或者下划线", checktype = "userName", requiredmessage = "*" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="TrueName" class="col-sm-3 control-label">真实姓名</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(p => p.TrueName, new { @class = "form-control", placeholder = "真实姓名", checktype = "required", requiredmessage = "*", })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Email" class="col-sm-3 control-label">手机号码</label>
+                        <div class="col-sm-6">
+
+                            @Html.TextBoxFor(p => p.Phone, new { @class = "form-control", placeholder = "手机号码" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Email" class="col-sm-3 control-label">邮 箱</label>
+                        <div class="col-sm-6">
+
+                            @Html.TextBoxFor(p => p.Email, new { @class = "form-control", placeholder = "输入有效的电子邮件地址" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Email" class="col-sm-3 control-label">所在单位</label>
+                        <div class="col-sm-6">
+
+                            @Html.TextBoxFor(p => p.Company, new { @class = "form-control", placeholder = "所在单位" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="TrueName" class="col-sm-3 control-label">用户头像</label>
+                        <div class="col-sm-6">
+                            <input id="flImge" name="flImge" type="file" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Pwd" class="col-sm-3 control-label">密 码</label>
+                        <div class="col-sm-6">
+                            @Html.PasswordFor(p => p.Pwd, new { @class = "form-control", checktype = "required", requiredmessage = "*", placeholder = "密 码" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Pwd" class="col-sm-3 control-label">重复密码</label>
+                        <div class="col-sm-6">
+                            <input type="password" id="rePwd" name="rePwd" class="form-control" placeholder="重复密码" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="RoleID" class="col-sm-3 control-label">角 色</label>
+                        <div class="col-sm-6">
+                            @Html.DropDownList("RoleID", null, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3" for="Des">描述</label>
+                        <div class="col-sm-4">
+                            @Html.TextBoxFor(p => p.BZ, new { @class = "form-control fcontent", placeholder = "描述" })
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 20px;">
+
+                        <div class="col-sm-offset-3 col-sm-5">
+                            <button type="button" id="btnSave" class="btn btn-info col-sm-2">确 定</button>
+                            <a href="@Url.Action("Index")" id="btnback" class="btn col-sm-2 btn-default col-sm-offset-1">返回</a>
+                        </div>
+
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*@Html.Partial("_KindEditor")*@
+<partial name="_KindEditor" />
+<script type="text/javascript">
+    function validatePwd() {
+        $("#rePwd").blur(function () {
+            var objDv = $(this).parent();
+            if ($("#rePwd").val() != $("#Pwd").val()) {
+                objDv.parent().addClass("has-error");
+                return false;
+            }
+            else {
+                var objDv = $(this).parent();
+                objDv.parent().addClass("has-success");
+            }
+        });
+        $("#rePwd").focus(function () {
+            var objDv = $(this).parent();
+            objDv.parent().removeClass("has-error");
+            $(objDv).find(".help-block").remove();
+        });
+    }
+
+    $(function () {
+        validatePwd();
+        $('#fm').validation();
+        if ($("#UserName").val() == "") {
+            $("#UserName").focus(function () {
+                var objDv = $(this).parent();
+                objDv.parent().removeClass("has-error");
+                $(objDv).find(".help-block").remove();
+            });
+
+            $("#UserName").blur(function () {
+                $.getJSON("@Url.Action("GetIsUserName")", { userName: $(this).val(), date: new Date().getTime() }, function (result) {
+                    var objDv = $("#UserName").parent();
+                    if (result == "True") {
+                        objDv.parent().addClass("has-error");
+                        $(objDv).append("<span id='valierr' class='help-block'>用户名已经存在</span>")
+                    }
+                    else {
+                        objDv.parent().addClass("has-success");
+                    }
+                });
+            });
+
+        }
+        else {
+            $("#UserName").attr("readonly", "readonly");
+            $("#rePwd").parent().parent().remove();
+            $("#Pwd").parent().parent().remove();
+        }
+
+
+        $("#btnSave").click(function () {
+            validatePwd();
+            if ($("#fm").valid() == false) {
+                return false;
+            }
+            if ($(".form-group").hasClass("has-error")) {
+                return false;
+            }
+            KindEditor.sync('#BZ'); //同步kineditor数据
+            var load = layer.load();
+            //异步提交
+            $('#fm').ajaxSubmit(function (data) {
+                layer.close(load);
+                if (data.r) {
+                    layer.msg("操作成功");
+                    window.location.href = "@Url.Action("Index")";
+                }
+                else {
+                    layer.alert(data.m);
+                }
+            });
+            return false;
+
+        })
+    })
+</script>

@@ -1,0 +1,97 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+@*@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers*@
+
+@section Css{
+    <style type="text/css">
+        .table {
+            margin-top: 10px;
+        }
+    </style>
+    @RenderSection("Css", false)
+}
+    <div id="wrapper">
+        @await Component.InvokeAsync("Left")
+        <div id="page-wrapper" class="gray-bg">
+            <div class="row wrapper border-bottom white-bg page-heading">
+                <a class="navbar-minimalize minimalize-styl-2 btn btn-primary "><i class="fa fa-bars"></i> </a>
+                <div class="col-lg-10">
+                    <div class="breadcrumbs" id="breadcrumbs">
+                        <ul class="breadcrumb" style="padding-top: 5px;">
+                            <li>
+                                <i class="ace-icon fa fa-home home-icon"></i>
+                                <a href="/Admin/Home">控制台</a>
+                            </li>
+                            <li>
+                                <span id="spT1">标题1</span>
+                            </li>
+                            <li>
+                                <span id="spT2">标题2</span>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </div>
+                <div class="col-lg-2">
+
+                </div>
+            </div>
+            <div class="wrapper wrapper-content animated fadeInRight">
+                <div class="row">
+                    <div class="col-lg-12">
+
+                        @RenderBody()
+                    </div>
+                </div>
+
+            </div>
+            <div class="footer">
+                <div class="pull-right">
+                    <a href="@Url.Content("~/Homen/Index") " target="_blank">查看网站</a>
+                </div>
+                <div>
+                    <strong>Copyright</strong> 同方知网 &copy; 2018
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+@section Js{
+    <script type="text/javascript">
+        $('[data-toggle=tooltip]').tooltip();
+        $(function () {
+            $("#side-menu li a").each(function () {
+                var aHref = $(this).attr("href");
+                var url = window.location.href.trim('#');
+                if (url.indexOf(aHref) > 0) {
+                    $(this).parent().addClass("active");
+                    $(this).parents("ul.nav-second-level").addClass("in");
+                    $(this).parents("ul.nav-second-level").parent().addClass("active");
+                    var spT2 = $(this).attr("title");
+
+                    var spT1 = $(this).parents("ul.nav-second-level").parent().find(".nav-label").text();
+                    if (spT1 != undefined && spT1 != "") {
+                        $("#spT1").text(spT1);
+                    } else {
+                        $("#spT1").parent().remove();
+                    }
+                    if (spT2 != undefined && spT2 != "") {
+                        $("#spT2").text(spT2);
+                        document.title = spT2;
+                    } else {
+                        $("#spT2").parent().remove();
+                    }
+
+                }
+            })
+        })
+
+    </script>
+    @RenderSection("Js", false)
+}

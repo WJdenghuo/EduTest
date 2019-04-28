@@ -1,0 +1,154 @@
+﻿@model IEnumerable<Edu.Models.Models.UserInfoView>
+
+<div class="alert alert-success">
+    注意：设置机构馆员时 可以新增用户选择角色为机构管理员的角色，也可以修改已有用户角色更改为角色管理员
+</div>
+
+<div class="ibox">
+    <div class="ibox-title">
+        <div class="btn-group">
+            <a class="btn  btn-sm  btn-primary shortcut-button dropdown-toggle" data-toggle="dropdown" href="#"><span class="fa fa-caret-down"> 用户管理</span></a>
+            <ul class="dropdown-menu">
+                <li><a href="@Url.Action("ModyOp")"><i class="fa fa-plus"></i> 添加用户</a></li>
+                <li><a href="javascript:ChangeState(1)"><i class="fa fa-unlock"></i> 用户解锁</a></li>
+                <li><a href="javascript:ChangeState(0)"><i class="fa fa-lock"></i> 用户锁定</a></li>
+                <li><a href="javascript:ChangeState(-1)"><i class="fa fa-remove"></i> 删除用户</a></li>
+            </ul>
+        </div>
+        <a class="btn btn-sm btn-primary" href="javascript:search();">
+            <i class="fa fa-search"></i>
+            搜索
+        </a>
+        <a class="fullscreen-link pull-right">
+            <i class="fa fa-expand"></i>
+        </a>
+    </div>
+    <div class="ibox-content">
+
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">
+                        <input type="checkbox" id='chkAll' class="check-all" />
+                    </th>
+                    <th>头像</th>
+                    <th>用户名</th>
+                    <th>真实姓名</th>
+                    <th>手机</th>
+                    <th>Email</th>
+                    <th>角色</th>
+                    <th>用户状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || Model.Count() == 0)
+                {
+                    <tr>
+                        <td colspan="10" style="text-align: center; font-size: 16px; color: red;">暂无数据</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="chkID" value="@item.ID" />
+                            </td>
+                            <td style="width: 80px;">
+                                <a href="javascript:showImg('头像','@item.Photo');">
+                                    <img src="@item.Photo" style="width:32px;height:32px;" />
+                                </a>
+                            </td>
+                            <td>@item.UserName</td>
+                            <td>@item.TrueName</td>
+                            <th>@item.Phone</th>
+                            <td>@item.Email</td>
+                            <td>@item.RoleName</td>
+                            <td>@*@(Html.Raw(Html.EnumDescriptionText<Edu.Models.UserInfo_UserStateColor>(item.States)))*@</td>
+
+                            <td>
+                                <a href="@Url.Action("ModyOp", new { id = item.ID })" data-toggle="tooltip" data-placement="top" title="修改">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <a href="javascript:ModyPwd('@item.ID')" data-toggle="tooltip" data-placement="top" title="修改密码">
+                                    <i class="fa fa-key"></i>
+                                </a>
+                                <a href="javascript:DeleteOp('@item.ID')" title="删除">
+                                    <i class="fa fa-remove"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<partial name="_Pager" />
+<partial name="_Dialog" />
+<script type="text/javascript">
+
+    function ModyPwd(userid) {
+        $("#dvFm").load("@Url.Action("GetModyPwd")", { userid: userid, date: new Date().getTime() }, function (result) {
+            $("#myModal").modal('show');
+            $("#myModalLabel").text("修改密码");
+            $('#fm').validation();
+            $("#UserName").attr("readonly", "readonly");
+        });
+    }
+    function DeleteOp(userid) {
+        layer.confirm("确定删除?", function () {
+            $.post("@Url.Action("DeleteOp")", { userid: userid, date: new Date().getTime() }, function (result) {
+                if (result.r) {
+                    layer.msg("删除成功");
+                    window.location.reload();
+                }
+                else {
+                    layer.msg("删除失败");
+                }
+            })
+        })
+    }
+
+    function search() {
+        var param = {
+            roleID: "@ViewBag.roleID",
+            OrganID: "@ViewBag.OrganID",
+            startT: "@ViewBag.startT",
+            endT: "@ViewBag.endT",
+            sn: "@ViewBag.sn",
+            Date: new Date().getTime()
+        };
+        $("#dvFm").load("@Url.Action("LoadSearch")", param, function (result) {
+            $("#myModal").modal('show');
+            $("#myModalLabel").text("搜索");
+            $('#fm').validation();
+            $("#hideType").val(0)
+        });
+    }
+
+    function ChangeState(_state) {
+        var CheckedValue = getChk();
+        if (CheckedValue == "") {
+            alert("请选择项");
+            return;
+        }
+        else {
+            var load = layer.load();
+            $.post("@Url.Action("ChangeStates")", { _state: _state, ids: CheckedValue, Date: new Date().getTime() }, function (data) {
+                layer.close(load);
+                if (data.r) {
+                    layer.msg("操作成功");
+                    location.reload();
+                }
+                else {
+                    layer.alert(data.m);
+                }
+            })
+        }
+
+    }
+</script>

@@ -1,0 +1,37 @@
+﻿@using (Html.BeginForm("Index", "UserInfo", FormMethod.Post, new { @id = "fm", @class = "form-horizontal", enctype = "multipart/form-data" }))
+{
+
+    <div class="form-group">
+        <label for="RoleID" class="col-sm-3 control-label">角 色</label>
+        <div class="col-sm-6">
+            @Html.DropDownList("roleID", null, "-请选择-", new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="UserName" class="col-sm-3 control-label">所在机构</label>
+        <div class="col-sm-6">
+            @Html.DropDownList("OrganID", null, "-请选择-", new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="UserName" class="col-sm-3 control-label">用户状态</label>
+        <div class="col-sm-6">
+            @*@(Html.EnumDescriptionDropDownList<Edu.Models.UserInfo_UserState>("state", ViewBag.state as object, new { @class = "form-control" }, true))*@
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="UserName" class="col-sm-3 control-label">创建时间</label>
+        <div class="col-sm-6">
+            @Html.TextBox("startT", ViewBag.startT as object, new { @class = "form-control datepicker", placeholder = "创建开始时间" })
+            @Html.TextBox("endT", ViewBag.endT as object, new { @class = "form-control datepicker", placeholder = "创建结束时间" })
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="UserName" class="col-sm-3 control-label">关键词</label>
+        <div class="col-sm-6">
+            @Html.TextBox("sn", ViewBag.sn as object, new { @class = "form-control", placeholder = "输入用户名邮箱手机真实姓名信息进行检索" })
+        </div>
+    </div>
+}
+
+@Html.Partial("_Datepicker")

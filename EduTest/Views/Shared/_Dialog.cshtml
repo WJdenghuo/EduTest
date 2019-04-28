@@ -1,0 +1,67 @@
+﻿<style type="text/css">
+.col-sm-3 {
+    width: 20%;
+}
+</style>
+<!-- Modal -->
+<div class="modal  fade" id="myModal" tabindex="0" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">管理</h4>
+            </div>
+            <div class="clear"></div>
+            <div id="dvFm" class="modal-body">
+            </div>
+            <div class="clear"></div>
+            <div class="modal-footer">
+                <button id="btnSave" type="button" class="btn btn-primary">确 定</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">关 闭</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="hideType" value="1" />
+<script type="text/javascript">
+    $(function () {
+        $("#btnSave").click(function () {
+            if ($("#fm").valid() == false) {
+                return;
+            }
+            var load = layer.load();
+            if ($("#hideType").val() == "0") {
+                //同步提交
+                $("#fm").submit();
+                return false;
+            }
+            else if ($("#hideType").val() == "1") {
+                //异步提交
+                $('#fm').ajaxSubmit(function (data) {
+                    //返回json格式{r:结果,m:消息,ur:跳转页面}
+                    layer.close(load);
+                    if (data.r) {
+                        layer.msg('操作成功');
+                        if (data.url == undefined) {
+                            window.location.reload();
+                        }
+                        else {
+                            window.location.href = data.url;
+                        }
+
+                    }
+                    else {
+                        layer.alert(data.m);
+                    }
+                });
+                return false;
+            }
+            else {
+
+            }
+
+
+        })
+    })
+</script>

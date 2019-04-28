@@ -1,0 +1,108 @@
+﻿@model Edu.Models.Models.LoginModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>后台登录</title>
+    <link href="~/Tookit/inspinia_admin/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Tookit/inspinia_admin/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="~/Tookit/inspinia_admin/css/animate.css" rel="stylesheet">
+    <link href="~/Tookit/inspinia_admin/css/style.css" rel="stylesheet">
+    <style type="text/css">
+        .gray-bg {
+            background-color: #424F63;
+        }
+    </style>
+</head>
+
+<body class="gray-bg">
+
+    <div class="middle-box text-center loginscreen animated fadeInDown">
+        <div>
+            <div>
+
+                <h1 class="logo-name">登录</h1>
+                @Html.Hidden("ReturnUrl", ViewBag.ReturnUrl as object)
+            </div>
+            <div id="dvErr" class="form-group" style="margin-top: 20px; font-size: 16px; color: red; text-align: center;">
+                @Html.ValidationSummary(true)
+            </div>
+
+            <form class="m-t" id="fm" method="post">
+                <div class="form-group">
+                    @Html.TextBoxFor(p => p.Account, new { checktype = "required", requiredmessage = "不能为空", placeholder = "用户名", @class = "form-control" })
+
+
+                </div>
+                <div class="form-group">
+                    @Html.PasswordFor(p => p.Password, new { @class = "form-control", placeholder = "密码", checktype = "required", requiredmessage = "不能为空" })
+
+                </div>
+                <button id="btnSave" type="button" class="btn btn-primary block full-width m-b">登录</button>
+
+
+
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Mainly scripts -->
+    <script src="~/Tookit/inspinia_admin/js/jquery-2.1.1.js"></script>
+    <script src="~/Tookit/inspinia_admin/js/bootstrap.min.js"></script>
+    <script src="~/Tookit/bootstrap/js/bootstrap3-validation.js"></script>
+    <script src="~/Scripts/jquery.form.js"></script>
+    <script src="~/Scripts/JsWindows.js"></script>
+    <script src="~/Scripts/JsCommon.js"></script>
+    <script src="~/Tookit/layui/layui.js"></script>
+    <script type="text/javascript">
+        layui.use('layer');
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            $('.m-t').validation();
+        })
+
+        $("#btnSave").click(function () {
+
+            if ($("#fm").valid() == false) {
+                return;
+            }
+            if ($(".form-group").hasClass("has-error")) {
+                return false;
+            }
+
+            var load = layer.load();
+            //异步提交
+            $('#fm').ajaxSubmit(function (data) {
+                layer.close(load);
+                if (data.r) {
+                    layer.msg("登录成功");
+                    if (data.url=="") {
+                        window.location.href = "/Admin/Home/Index";
+                    }
+                    else {
+                        window.location.href = data.url;
+                    }
+                    
+                }
+                else {
+                    layer.alert(data.m);
+                }
+            });
+            return false;
+
+        })
+    </script>
+</body>
+
+</html>
+
