@@ -7,12 +7,14 @@ using Edu.Models.Models;
 using Edu.Service;
 using Edu.Service.Admin;
 using Edu.Tools;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace EduTest.Areas.Admin.Controllers
 {
+    [Authorize(Roles = "1")]
     public class UserInfoController : Controller
     {
         

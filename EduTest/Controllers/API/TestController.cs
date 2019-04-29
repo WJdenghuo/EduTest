@@ -8,11 +8,13 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Edu.Entity;
+using Edu.Models.Data;
 using Edu.Models.Models;
 using Edu.Service;
 using Edu.Tools;
 using EduTest.Auth;
 using IdentityModel;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +27,7 @@ namespace EduTest.Controllers.API
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 
     public class TestController : ControllerBase
     {       
@@ -68,41 +71,37 @@ namespace EduTest.Controllers.API
 
         [HttpPost]
         [Route("PostTest")]
-        [Authorize]
         public IActionResult PostTest()
         {
             return Content("测试2");
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="userDto"></param>
-        /// <returns></returns>
+
+        [AllowAnonymous]
         [HttpPost]
         [Route("GetToken")]
-        public IActionResult Authenticate([FromBody]UserDto userDto)
+        public IActionResult Authenticate([FromBody] UserDto userDto)
         {
-            var user = _repositoryUserInfo.Get(x=>x.UserName==userDto.UserName);
+            //System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+            var user = _repositoryUserInfo.Get(x=>x.UserName== userDto.UserName);
             if (user == null) return Unauthorized("用户名错误");
-            if (user.Pwd!=MD5Helper.GetMD5String(userDto.Password))
-            {
-                return Content("密码错误");
-            }
+            if (user.Pwd!=MD5Helper.GetMD5String(userDto.Password)) return Unauthorized("密码错误");
+
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("cnki");
+            var key = Encoding.ASCII.GetBytes(Consts.Secret);
             var authTime = DateTime.UtcNow;
-            var expiresAt = authTime.AddDays(7);
+            var expiresAt = authTime.AddMinutes(20);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
                     new Claim(JwtClaimTypes.Audience,"api"),
-                    new Claim(JwtClaimTypes.Issuer,"http://localhost:5200"),
+                    new Claim(JwtClaimTypes.Issuer,"https://localhost:44343/"),
                     new Claim(JwtClaimTypes.Id, user.ID.ToString()),
                     new Claim(JwtClaimTypes.Name, user.UserName),
                     new Claim(JwtClaimTypes.Email, user.Email),
-                    new Claim(JwtClaimTypes.PhoneNumber, user.Phone)
+                    new Claim(JwtClaimTypes.PhoneNumber, user.Phone??"18014087280")
                 }),
+                NotBefore=DateTime.UtcNow,
                 Expires = expiresAt,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -120,6 +119,40 @@ namespace EduTest.Controllers.API
                     expires_at = new DateTimeOffset(expiresAt).ToUnixTimeSeconds()
                 }
             });
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("GetToken1")]
+        public string GetToken(string userName, string password)
+        {
+            bool success = ((userName == "user") && (password == "111"));
+            if (!success)
+                return "";
+
+            JWTTokenOptions jwtTokenOptions = new JWTTokenOptions();
+
+            //创建用户身份标识
+            var claims = new Claim[]
+            {
+                new Claim(ClaimTypes.Sid, userName),
+                new Claim(ClaimTypes.Name, userName),
+                new Claim(ClaimTypes.Role, "user"),
+            };
+
+            //创建令牌
+            var token = new JwtSecurityToken(
+                issuer: jwtTokenOptions.Issuer,
+                audience: jwtTokenOptions.Audience,
+                claims: claims,
+                notBefore: DateTime.Now,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: jwtTokenOptions.Credentials
+                );
+
+            string jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwtToken;
         }
     }
 }

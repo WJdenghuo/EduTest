@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EduTest.Areas.Admin.Controllers
 {
-    //[Authorize(Roles = "1")]
+    [Authorize(Roles = "1")]
     [Area("Admin")]
     [AllowAnonymous]
     //[Route("[area]/[controller]/[action]")]
