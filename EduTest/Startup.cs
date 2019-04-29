@@ -1,4 +1,5 @@
 ﻿using Edu.Entity;
+using Edu.Entity.MySqlEntity;
 using Edu.Models.Data;
 using Edu.Models.Models;
 using Edu.Service;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -42,7 +44,10 @@ namespace EduTest
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-
+            //mysql
+            services.AddDbContext<BaseEduContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection")));
             //
             services.AddScoped(typeof(IAsyncRepository<>), typeof(SugarRepository<>));
             services.AddScoped(typeof(IRepository<>), typeof(SugarRepository<>));
