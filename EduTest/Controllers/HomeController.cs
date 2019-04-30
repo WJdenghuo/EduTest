@@ -23,12 +23,11 @@ namespace EduTest.Controllers
             _baseEduContext = baseEduContext;
         }      
         public async Task<IActionResult>  Index()
-        {                         
-            var test =await _baseEduContext.UserInfo.AsNoTracking().Where(x => x.Id != 0).ToListAsync();
-            _logger.LogInformation("胡汉三来了");
-            _logger.LogError("座山雕也来了！");
-            _logger.LogInformation($"mysql测试数据：{test.ToString()}");
-                  
+        {
+            User.Claims.SingleOrDefault(x => x.Type == "").Value;  
+                var test =await _baseEduContext.UserInfo.AsNoTracking().Where(x => x.Id != 0).ToListAsync();
+            _logger.LogInformation("写入数据库测试！");
+            //异常错误的捕获需要添加全局异常捕获
             return View();
         }
        

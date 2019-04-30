@@ -20,6 +20,8 @@ namespace Edu.Entity.MySqlEntity
         public virtual DbSet<PhoneUserCode> PhoneUserCode { get; set; }
         public virtual DbSet<UserInfo> UserInfo { get; set; }
         public virtual DbSet<UserRole> UserRole { get; set; }
+        public virtual DbSet<Log> Log { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -194,6 +196,25 @@ namespace Edu.Entity.MySqlEntity
                 entity.Property(e => e.States).HasColumnType("int(11)");
 
                 entity.Property(e => e.StatesDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<Log>(entity =>
+            {
+                entity.Property(e => e.Id).HasColumnType("int(11)");
+
+                entity.Property(e => e.Callsite).HasColumnType("varchar(255)");
+
+                entity.Property(e => e.Exception).HasColumnType("varchar(255)");
+
+                entity.Property(e => e.Level).HasColumnType("varchar(50)");
+
+                entity.Property(e => e.Logged).HasColumnType("datetime");
+
+                entity.Property(e => e.Logger).HasColumnType("varchar(250)");
+
+                entity.Property(e => e.MachineName).HasColumnType("varchar(50)");
+
+                entity.Property(e => e.Message).HasColumnType("varchar(255)");
             });
         }
     }

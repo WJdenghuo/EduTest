@@ -50,13 +50,14 @@ namespace EduTest
             });
 
             //mysql
-            //使用池减少开销，略微增加性能
+            //多个数据库上下文可以使用池减少开销，略微增加性能
             services.AddDbContext<BaseEduContext>(options =>
-                options.UseLazyLoadingProxies().UseSqlServer(
+                options.UseLazyLoadingProxies().UseMySql(
                     Configuration.GetConnectionString("DefaultConnection"),
                     //弹性连接,命令超时
                     mySqlOptions => mySqlOptions.EnableRetryOnFailure().CommandTimeout(3)));
             
+            //
             services.AddScoped(typeof(IAsyncRepository<>), typeof(SugarRepository<>));
             services.AddScoped(typeof(IRepository<>), typeof(SugarRepository<>));
             services.AddScoped<IAccount, Account>();
@@ -117,6 +118,8 @@ namespace EduTest
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            //NLog.LogManager.LoadConfiguration("nlog.config").GetCurrentClassLogger();
+            //NLog.LogManager.Configuration.Variables["connectionString"] = Configuration.GetConnectionString("DefaultConnection"); Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);  //避免日志中的中文输出乱码
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
