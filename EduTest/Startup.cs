@@ -16,9 +16,12 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using MySqlConnector.Logging;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -28,13 +31,14 @@ namespace EduTest
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, ILogger<Startup> logger)
         {
             Configuration = configuration;
+            _logger = logger;
         }
 
         public IConfiguration Configuration { get; }
-
+        private readonly ILogger _logger;
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -44,18 +48,21 @@ namespace EduTest
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+
             //mysql
+            //使用池减少开销，略微增加性能
             services.AddDbContext<BaseEduContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
-            //
+                options.UseLazyLoadingProxies().UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection"),
+                    //弹性连接,命令超时
+                    mySqlOptions => mySqlOptions.EnableRetryOnFailure().CommandTimeout(3)));
+            
             services.AddScoped(typeof(IAsyncRepository<>), typeof(SugarRepository<>));
             services.AddScoped(typeof(IRepository<>), typeof(SugarRepository<>));
             services.AddScoped<IAccount, Account>();
 
             //
             JWTTokenOptions jwtTokenOptions = new JWTTokenOptions();
-
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(x =>
                 {
@@ -63,68 +70,23 @@ namespace EduTest
                     x.ExpireTimeSpan= new TimeSpan(0, 0, 30, 0, 0);
                     //x.AccessDeniedPath = "";
                 })
-            //.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwtBearerOptions =>
-            //{
-            //    jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ValidateIssuerSigningKey = true,
-            //        IssuerSigningKey = jwtTokenOptions.Key,
-
-            //        ValidateIssuer = true,
-            //        ValidIssuer = jwtTokenOptions.Issuer,
-
-            //        ValidateAudience = true,
-            //        ValidAudience = jwtTokenOptions.Audience,
-
-            //        ValidateLifetime = true,
-            //        ClockSkew = TimeSpan.FromMinutes(5)
-            //    };
-            //});
-            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, o =>
-            {
-                //token not in headers
-                //o.Events = new JwtBearerEvents()
-                //{
-                //    OnMessageReceived = context =>
-                //    {
-                //        context.Token = context.Request.Query["access_token"];
-                //        return Task.CompletedTask;
-                //    },
-                //    //其他几个事件根据需要重写逻辑；
-                //};
-
-                //o.TokenValidationParameters = new TokenValidationParameters
-                //{
-
-                //};
-                o.TokenValidationParameters = new TokenValidationParameters
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, o =>
                 {
-                    NameClaimType = JwtClaimTypes.Name,
-                    RoleClaimType = JwtClaimTypes.Role,
+                
+                    o.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        NameClaimType = JwtClaimTypes.Name,
+                        RoleClaimType = JwtClaimTypes.Role,
 
-                    //颁发机构
-                    ValidIssuer = "https://localhost:44343/",
-                    //颁发给谁
-                    ValidAudience = "api",
-                    //签名秘钥
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Consts.Secret))
-
-                    /***********************************TokenValidationParameters的参数默认值***********************************/
-                    // RequireSignedTokens = true,
-                    // SaveSigninToken = false,
-                    // ValidateActor = false,
-                    // 将下面两个参数设置为false，可以不验证Issuer和Audience，但是不建议这样做。
-                    // ValidateAudience = true,
-                    // ValidateIssuer = true, 
-                    // ValidateIssuerSigningKey = false,
-                    // 是否要求Token的Claims中必须包含Expires
-                    // RequireExpirationTime = true,
-                    // 允许的服务器时间偏移量
-                    // ClockSkew = TimeSpan.FromSeconds(300),
-                    // 是否验证Token有效期，使用当前时间与Token的Claims中的NotBefore和Expires对比
-                    // ValidateLifetime = true
-                };
-            });
+                        //颁发机构
+                        ValidIssuer = "https://localhost:44343/",
+                        //颁发给谁
+                        ValidAudience = "api",
+                        //签名秘钥
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Consts.Secret))
+                   
+                    };
+                });
 
             //
             services.AddMvc(options =>
@@ -135,6 +97,8 @@ namespace EduTest
                 options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
                 
             })
+            //忽略循环引用
+            .AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
