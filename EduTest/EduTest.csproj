@@ -7,10 +7,6 @@
     <UserSecretsId>73245a73-b19a-4127-8a63-8005f4029aac</UserSecretsId>  
   </PropertyGroup>
 
-  <ItemGroup>
-    <Content Remove="nlog.config" />
-  </ItemGroup>
-
 
 
   <ItemGroup>
@@ -53,9 +49,6 @@
 
   <ItemGroup>
     <None Include="Areas\Admin\Views\Shared\_Layout.cshtml" />
-    <None Include="nlog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="wwwroot\Scripts\bootstrap.js" />
     <None Include="wwwroot\Scripts\bootstrap.min.js" />
     <None Include="wwwroot\Scripts\jquery-1.10.2.intellisense.js" />
@@ -679,6 +672,13 @@
     <None Include="wwwroot\Tookit\zTree\js\jquery.ztree.exedit.js" />
     <None Include="wwwroot\Tookit\zTree\js\jquery.ztree.exhide-3.5.js" />
     <None Include="wwwroot\Tookit\zTree\js\jquery.ztree.exhide-3.5.min.js" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Content Update="nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

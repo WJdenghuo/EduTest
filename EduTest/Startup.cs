@@ -61,6 +61,7 @@ namespace EduTest
             services.AddScoped(typeof(IAsyncRepository<>), typeof(SugarRepository<>));
             services.AddScoped(typeof(IRepository<>), typeof(SugarRepository<>));
             services.AddScoped<IAccount, Account>();
+            services.AddSingleton<IEsClientProvider, EsClientProvider>();
 
             //
             JWTTokenOptions jwtTokenOptions = new JWTTokenOptions();

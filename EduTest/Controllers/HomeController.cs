@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Http;
 using Edu.Entity.MySqlEntity;
 using Microsoft.EntityFrameworkCore;
 using Edu.Entity;
+using NLog.Targets;
+using NLog.Conditions;
 
 namespace EduTest.Controllers
 {
@@ -24,9 +26,21 @@ namespace EduTest.Controllers
         }      
         public async Task<IActionResult>  Index()
         {
-            User.Claims.SingleOrDefault(x => x.Type == "").Value;  
-                var test =await _baseEduContext.UserInfo.AsNoTracking().Where(x => x.Id != 0).ToListAsync();
-            _logger.LogInformation("写入数据库测试！");
+            NLog.LogEventInfo ei = new NLog.LogEventInfo(NLog.LogLevel.Debug, _logger.GetType().Name, $"{User.Identity.Name}:写入数据库测试！");
+            ei.Properties["Application"] = "test";
+            var test =await _baseEduContext.UserInfo.AsNoTracking().Where(x => x.Id != 0).ToListAsync();
+            //自定义参数存在问题，待调试
+            _logger.LogError("颜色测试", ei);
+
+            #region 测试
+            //var consoleTarget = new ColoredConsoleTarget();
+            //var highlightRule = new ConsoleRowHighlightingRule();
+            //highlightRule.Condition = ConditionParser.ParseExpression("level == LogLevel.Info");
+            //highlightRule.ForegroundColor = ConsoleOutputColor.Green;
+            //consoleTarget.RowHighlightingRules.Add(highlightRule);
+            //_logger.LogTrace("控制台测试");
+            #endregion
+
             //异常错误的捕获需要添加全局异常捕获
             return View();
         }
