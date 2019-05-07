@@ -2,12 +2,12 @@
 EduTest
 
 目前实现如下功能：
-orm：sugarsql， ef core（mysql）；
+orm：sugarsql， ef core（mysql）；\n\r
 tools：常用的基本方法；
 认证：mvc使用identity的cookie，api使用jwt（颁发和认证）；
 视图：提供ViewComponent的实例替换以前的动态视图；
 日志：使用nlog，支持file，debugger，datebase；
-ElasticSearch：提供插入和查询的示例，使用nest作为客户端，服务端使用java 1.8和最细版的ElasticSearch window客户端；
+ElasticSearch：提供插入和查询的示例，使用nest作为客户端，服务端使用java 1.8和最新版的ElasticSearch window客户端；
 api：提供swagger支持；
 后台管理：基本的用户，角色及权限控制后台逻辑全部完成（以前旧项目，找时间会重写，细化逻辑）；
 docker：提供docker启动，端口部分需要自配；
