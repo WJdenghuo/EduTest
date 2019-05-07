@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace Edu.Entity.MySqlEntity
 {
+    [JsonObjectAttribute]
     public partial class Log
     {
-        public int Id { get; set; }
+        public Int64 Id { get; set; }
         public string MachineName { get; set; }
         public DateTime? Logged { get; set; }
         public string Level { get; set; }

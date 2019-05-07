@@ -20,19 +20,19 @@ namespace EduTest.Controllers
 
         [HttpPost]
         [Route("value/index")]
-        public IIndexResponse Index(Log log)
+        public IIndexResponse Index([FromBody]Log log)
         {
             return _client.IndexDocument(log);
         }
 
         [HttpPost]
         [Route("value/search")]
-        public IReadOnlyCollection<Log> Search(string type)
+        public IReadOnlyCollection<Log> Search([FromQuery]string level)
         {
             return _client.Search<Log>(s => s
                 .From(0)
                 .Size(10)
-                .Query(q => q.Match(m => m.Field(f => f.Level).Query(type)))).Documents;
+                .Query(q => q.Match(m => m.Field(f => f.MachineName).Query(level)))).Documents;
         }
     }
 }

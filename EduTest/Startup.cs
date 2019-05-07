@@ -93,14 +93,14 @@ namespace EduTest
             //
             services.AddMvc(options =>
             {
-                options.RespectBrowserAcceptHeader = true; // false by default
+                //options.RespectBrowserAcceptHeader = true; // false by default
 
                 //options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
-                options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+                //options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
                 
             })
             //忽略循环引用
-            .AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+            //.AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
