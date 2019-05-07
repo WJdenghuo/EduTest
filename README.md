@@ -2,7 +2,7 @@
 EduTest
 
 目前实现如下功能：
-orm：sugarsql， ef core（mysql）；\n\r
+orm：sugarsql， ef core（mysql）；
 tools：常用的基本方法；
 认证：mvc使用identity的cookie，api使用jwt（颁发和认证）；
 视图：提供ViewComponent的实例替换以前的动态视图；
