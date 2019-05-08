@@ -9,6 +9,7 @@ using Edu.Service;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EduTest.Controllers
@@ -27,10 +28,11 @@ namespace EduTest.Controllers
         #region 管理员登录
         // GET: Account
         [AllowAnonymous]
-        public ActionResult Admin_login()
+        public async Task<IActionResult>  Admin_login()
         {
             //FormsAuthentication.SignOut();
-            
+            // Clear the existing external cookie to ensure a clean login process
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             return View();
         }
         [HttpPost]
