@@ -9,6 +9,7 @@ using Nest;
 
 namespace EduTest.Controllers
 {
+    [Route("[controller]/[action]")]
     public class ElasticSearchController : Controller
     {
         private readonly ElasticClient _client;
@@ -19,20 +20,34 @@ namespace EduTest.Controllers
         }
 
         [HttpPost]
-        [Route("value/index")]
         public IIndexResponse Index([FromBody]Log log)
         {
             return _client.IndexDocument(log);
         }
 
         [HttpPost]
-        [Route("value/search")]
         public IReadOnlyCollection<Log> Search([FromQuery]string level)
         {
             return _client.Search<Log>(s => s
                 .From(0)
                 .Size(10)
-                .Query(q => q.Match(m => m.Field(f => f.MachineName).Query(level)))).Documents;
+                .Query(q => q
+                    .Match(m => m
+                        .Field(f => f.
+                            MachineName).Query(level)
+                        )
+                        && q
+                    .Match(m => m
+                        .Field(f => f.
+                            Level).Query("error")
+                        )
+                        &&+q
+                    .Match(m => m
+                        .Field(f => f.
+                            Id).Query("6")
+                        )
+                    )
+                ).Documents;
         }
     }
 }
