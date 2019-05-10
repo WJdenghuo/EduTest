@@ -69,7 +69,6 @@ namespace EduTest
             services.AddMediatR(typeof(PingHandler).Assembly,
                                 typeof(Pong1).Assembly, typeof(Pong2).Assembly);
 
-
             JWTTokenOptions jwtTokenOptions = new JWTTokenOptions();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(x =>

@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
     <PackageReference Include="mySqlSugarCore" Version="3.5.4" />
     <PackageReference Include="NEST.JsonNetSerializer" Version="6.6.0" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.8.2" />
     <PackageReference Include="sqlSugarCore" Version="4.9.9.8" />
   </ItemGroup>
 
