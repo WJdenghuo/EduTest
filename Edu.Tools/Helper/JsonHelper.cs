@@ -90,7 +90,11 @@ namespace Edu.Tools
         {
             return JsonConvert.DeserializeObject<T>(input, settings);
         }
-
+        public static bool DeserializeJsonToObject<T>(object result, out T t)
+        {       
+            t=JsonConvert.DeserializeObject<T>(result.ToString());
+            return t==null?false:true;
+        }
         private object NullToEmpty(object obj)
         {
             return null;

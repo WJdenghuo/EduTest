@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Edu.Entity;
 using NLog.Targets;
 using NLog.Conditions;
+using Edu.Tools.Helper;
+using UserInfo = Edu.Entity.MySqlEntity.UserInfo;
 
 namespace EduTest.Controllers
 {
@@ -29,6 +31,15 @@ namespace EduTest.Controllers
             NLog.LogEventInfo ei = new NLog.LogEventInfo(NLog.LogLevel.Debug, _logger.GetType().Name, $"{User.Identity.Name}:写入数据库测试！");
             ei.Properties["Application"] = "test";
             var test =await _baseEduContext.UserInfo.AsNoTracking().Where(x => x.Id != 0).ToListAsync();
+            RedisHelper redisHelper = new RedisHelper("127.0.0.1:6379");
+
+            redisHelper.HashSet("RightsTable", test, R =>
+            {
+                return R.Id.ToString();
+            });
+            var RsultList = redisHelper.HashGetAll<UserInfo>("RightsTable");
+
+
             //自定义参数存在问题，待调试
             _logger.LogError("颜色测试", ei);
 
