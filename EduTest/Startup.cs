@@ -7,6 +7,7 @@ using Edu.Models.Models;
 using Edu.Service;
 using Edu.Service.Admin;
 using Edu.Service.MediatR;
+using Edu.Tools.Redis;
 using IdentityModel;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -21,8 +22,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MySqlConnector.Logging;
+using StackExchange.Redis;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Collections.Generic;
@@ -46,6 +49,7 @@ namespace EduTest
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<RedisSetting>(Configuration);
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -68,6 +72,14 @@ namespace EduTest
             services.AddSingleton<IEsClientProvider, EsClientProvider>();
             services.AddMediatR(typeof(PingHandler).Assembly,
                                 typeof(Pong1).Assembly, typeof(Pong2).Assembly);
+            services.AddSingleton<ConnectionMultiplexer>(sp =>
+            {
+                var settings = sp.GetRequiredService<IOptions<RedisSetting>>().Value;
+                //也可以直接使用Configuration获取redis连接信息
+                var configuration = ConfigurationOptions.Parse(settings.RedisConnectionString, true);
+                configuration.ResolveDns = true;
+                return ConnectionMultiplexer.Connect(configuration);
+            });
 
             JWTTokenOptions jwtTokenOptions = new JWTTokenOptions();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

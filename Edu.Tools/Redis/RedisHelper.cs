@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Edu.Tools.Helper
+namespace Edu.Tools.Redis
 {
     /// <summary>
     /// Redis读写帮助类
