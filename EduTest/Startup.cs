@@ -8,6 +8,7 @@ using Edu.Service;
 using Edu.Service.Admin;
 using Edu.Service.MediatR;
 using Edu.Tools.Redis;
+using EduTest.Infrastructure.Filters;
 using IdentityModel;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -114,7 +115,8 @@ namespace EduTest
 
                 //options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
                 //options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
-                
+                options.Filters.Add(typeof(HttpGlobalExceptionFilter));
+                options.Filters.Add(typeof(ValidateModelStateFilter));
             })
             //忽略循环引用
             //.AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)

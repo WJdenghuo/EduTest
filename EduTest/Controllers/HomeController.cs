@@ -66,7 +66,7 @@ namespace EduTest.Controllers
             //_logger.LogTrace("控制台测试");
             #endregion
 
-            //异常错误的捕获需要添加全局异常捕获
+            //异常错误的捕获需要添加全局异常捕获，在mvc中添加异常和表单验证的过滤器。
             return View();
         }
        
