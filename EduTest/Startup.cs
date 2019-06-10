@@ -8,6 +8,7 @@ using Edu.Service;
 using Edu.Service.Admin;
 using Edu.Service.MediatR;
 using Edu.Tools.Redis;
+using EduTest.Hubs;
 using EduTest.Infrastructure.Filters;
 using IdentityModel;
 using MediatR;
@@ -48,7 +49,7 @@ namespace EduTest
         public IConfiguration Configuration { get; }
         private readonly ILogger _logger;
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.Configure<RedisSetting>(Configuration);
             services.Configure<CookiePolicyOptions>(options =>
@@ -67,8 +68,8 @@ namespace EduTest
                     mySqlOptions => mySqlOptions.EnableRetryOnFailure().CommandTimeout(3)));
             
             //
-            services.AddScoped(typeof(IAsyncRepository<>), typeof(SugarRepository<>));
-            services.AddScoped(typeof(IRepository<>), typeof(SugarRepository<>));
+            services.AddTransient(typeof(IAsyncRepository<>), typeof(SugarRepository<>));
+            services.AddTransient(typeof(IRepository<>), typeof(SugarRepository<>));
             services.AddScoped<IAccount, Account>();
             services.AddSingleton<IEsClientProvider, EsClientProvider>();
             services.AddMediatR(typeof(PingHandler).Assembly,
@@ -132,6 +133,15 @@ namespace EduTest
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+            services.AddSignalR();
+            //使用autofac替换容器后，启动速度会慢很多。
+            services.AddOptions();
+            var container = new ContainerBuilder();
+            container.Populate(services);
+            //向容器注入服务示例
+            //container.RegisterType<Account>().AsSelf().As<IAccount>().InstancePerLifetimeScope();
+            //container.RegisterGeneric(typeof(SugarRepository<>)).As(typeof(IRepository<>));
+            return new AutofacServiceProvider(container.Build());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -179,6 +189,10 @@ namespace EduTest
                     name: "Admin",
                     areaName: "Admin",
                     template: "Admin/{controller=Home}/{action=Index}");
+            });
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<ChatHub>("/chatHub");
             });
         }
     }

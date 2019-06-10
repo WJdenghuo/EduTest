@@ -4,14 +4,9 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
-    <UserSecretsId>73245a73-b19a-4127-8a63-8005f4029aac</UserSecretsId>  
+    <UserSecretsId>73245a73-b19a-4127-8a63-8005f4029aac</UserSecretsId>
+    <TypeScriptToolsVersion>3.1</TypeScriptToolsVersion>  
   </PropertyGroup>
-
-
-
-  <ItemGroup>
-    <None Remove="Dockerfile" />
-  </ItemGroup>
 
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -20,6 +15,8 @@
 
   
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.9.2" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.4.0" />
     <PackageReference Include="IdentityModel" Version="3.10.10" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.2.0" />
@@ -46,6 +43,7 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Areas\Admin\Models\" />
+    <Folder Include="Infrastructure\Middlewares\" />
   </ItemGroup>
 
 
