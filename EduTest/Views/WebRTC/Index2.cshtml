@@ -14,7 +14,7 @@
     @*<script src="https://cdn.bootcss.com/socket.io/2.2.0/socket.io.js"></script>*@
     <script src="https://cdn.bootcss.com/adapterjs/0.15.4/adapter.min.js"></script>
     <script src="https://cdn.bootcss.com/adapterjs/0.15.4/adapter.screenshare.min.js"></script>
-    <title>local</title>
+    <title>remote</title>
 </head>
 <body>
     <video id="local_video" autoplay playsinline width="400" height="400"></video>
@@ -27,7 +27,7 @@
     <a href="@Url.Action("Init","WebRTC")" target="_blank">local</a>
     <a href="@Url.Action("ResponseInit","WebRTC")" target="_blank">remote</a>
     <a href="@Url.Action("SimpleWebRTC","WebRTC")" target="_blank">SimpleWebRTC</a>
-    <a href="@Url.Action("Index2","WebRTC")" target="_blank">Index2</a>
+
     <script id="showVideo">
         var ice = {
             "iceServers": [
@@ -36,19 +36,17 @@
             ]/*, "sdpSemantics": 'plan-b'*/
         };
         var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();;
-      
-        $(function () {
-            //document.querySelector('#showVideo').addEventListener('click', e => init(e));
-            document.querySelector('#showVideo').addEventListener('click', e => rtcInit(e));
-            //document.querySelector('#showVideo').addEventListener('click', function () { signalrInit("SendMessage","test","hello")});
-        })
+        var pc = null;
         var constraints = window.constraints = {
             audio: false,
             video: {
                 frameRate: { ideal: 10, max: 15 }
             }
         };
-
+        $(function () {
+            document.querySelector('#showVideo').addEventListener('click', e => rtcInit(e));
+        })
+        
         function handleSuccess(stream) {
             var video = document.querySelector('#local_video');
             var videoTracks = stream.getVideoTracks();
@@ -79,9 +77,6 @@
             }
         }
 
-       
-        function logError() { }
-
         /*
         *  ********************初始化信令**************************
         */
@@ -99,32 +94,21 @@
             await start();
         });
         async function signalrInit(eventName, value, message) {
-           
+
             //connection.start().catch(err => console.error(err.toString()));
             await start();
 
             var timer;
-            var count = 0;
             function myfunction() {
                 console.log(connection.connectionState);
-
-                count++;
-                if (count>3) {
-                    window.clearInterval(timer);
-                    count = 0;
-                }
-               
                 if (connection.connectionState) {
-                    
                     connection.invoke(eventName, value, message).catch(function (err) {
-                        console.error("如果房间内第一个用户进入发生该错误，请不要在意，服务端为Clients.Others.SendAsync（），因为该房间内没有其他用户，所以服务端会发生错误；");
                         return console.error(err.toString());
                     });
                     window.clearInterval(timer);
                 }
             }
-            timer = window.setInterval(myfunction, 1000);
-
+            timer = window.setInterval(myfunction, 500);
         }
         async function sendMessage(eventName, value, message) {
             if (connection.connectionState) {
@@ -143,43 +127,39 @@
         async function rtcInit(e) {
             try {
                 await signalrInit();
-                var pc = new RTCPeerConnection(ice);
-
-                var stream = await navigator.mediaDevices.getUserMedia(constraints);
-                pc.addStream(stream);
-
-                handleSuccess(stream);
+                pc = new RTCPeerConnection(ice);
 
                 //收集本地媒体消息
-                pc.createOffer(async function (offer) {
+                //pc.createOffer(function (offer) {
 
-                    pc.setLocalDescription(offer);
-                    //console.log("local sdp:" + offer.sdp);
-                    //console.log("signalr连接状态："+connection.connectionState);
-                    //connection.invoke("SendMessage", $("#UserName").val(), offer.sdp).catch(function (err) {
-                    //    return console.error(err.toString());
-                    //});
-                    await sendMessage("SendMessage", $("#UserName").val(), offer);
-                }, function (error) { console.log(error); });
+                //    pc.setLocalDescription(offer);
+                //    //console.log("local sdp:" + offer.sdp);
+                //    //console.log("signalr连接状态："+connection.connectionState);
+                //    //connection.invoke("SendMessage", $("#UserName").val(), offer.sdp).catch(function (err) {
+                //    //    return console.error(err.toString());
+                //    //});
+                //    sendMessage("SendMessage", $("#UserName").val(), offer);
+                //}, function (error) { console.log(error); });
 
                 pc.oniceconnectionstatechange = (evt) => {
                     console.log('ICE connection state change: ' + evt.target.iceConnectionState);
                 };
-                pc.onicecandidate = async function (evt) {
-
+                pc.onicecandidate = function (evt) {
+                    console.log("onicecandidate:"+evt.target.iceGatheringState);
                     if (evt.target.iceGatheringState == "complete") {
-                        pc.createOffer(async function (offer) {
+                        pc.createOffer(function (offer) {
                             pc.setLocalDescription(offer);
-                            await sendMessage("SendMessage", $("#UserName").val(), offer);
+                            sendMessage("SendMessage", $("#UserName").val(), offer);
                         }, function (error) { console.log(error); });
                     }
                     if (evt.candidate) {
-                        await sendMessage("SendMessage", $("#UserName").val(), evt.candidate);
+                        console.log("onicecandidate:"+evt.candidate);
+                        sendMessage("SendMessage", $("#UserName").val(), evt.candidate);
                     }
                 }
 
                 //收集远端sdp，IceCandidate
-                connection.on("ReceiveMessage", async function (user, message) {
+                connection.on("ReceiveMessage", function (user, message) {
 
                     console.log(message);
                     if (message.candidate) {
@@ -188,17 +168,18 @@
                     if (message.type == "offer") {
 
                         pc = new RTCPeerConnection(ice);
+
                         pc.setRemoteDescription(message);
 
-                        pc.createAnswer(async function (answer) {
+                        pc.createAnswer(function (answer) {
                             pc.setLocalDescription(answer);
-                            await sendMessage("SendMessage", $("#UserName").val(), answer);
+                            sendMessage("SendMessage", $("#UserName").val(), answer);
                         }, function (error) { console.log(error); });
 
-                        pc.onicecandidate = async function (evt) {
+                        pc.onicecandidate = function (evt) {
 
                             if (evt.candidate) {
-                                await sendMessage("SendMessage", $("#UserName").val(), evt.candidate);
+                                sendMessage("SendMessage", $("#UserName").val(), evt.candidate);
                                 //connection.invoke("SendMessage", $("#UserName").val(), evt.candidate).catch(function (err) {
                                 //    return console.error(err.toString());
                                 //});
@@ -207,15 +188,25 @@
 
                         pc.onaddstream = function (evt) {
 
-                            //var remote_video = document.getElementById('remote_video');
-                            //remote_video.src = window.URL.createObjectURL(evt.stream);
                             var remotevideo = document.querySelector('#remote_video');
                             var videoTracks = evt.stream.getVideoTracks();
                             console.log('Got remote stream with constraints:', constraints);
                             console.log(`Using remote video device: ${videoTracks[0].label}`);
                             remotevideo.srcObject = evt.stream;
-                            window.stream2 = evt.stream;
-                            //remotevideo.src = window.URL.createObjectURL(evt.stream);
+                            window.stream = evt.stream;
+                            //
+
+                            //pc = new RTCPeerConnection(ice);
+                            //var stream = navigator.mediaDevices.getUserMedia(constraints);
+                            //pc.addStream(stream);
+
+                            //handleSuccess(stream);
+
+                            ////收集本地媒体消息
+                            //pc.createOffer(function (offer) {
+                            //    pc.setLocalDescription(offer);
+                            //    sendMessage("SendMessage", $("#UserName").val(), offer);
+                            //}, function (error) { console.log(error); });
                         }
                     }
                     if (message.type == "answer") {
@@ -227,7 +218,6 @@
 
                     var remotevideo = document.querySelector('#remote_video');
                     remotevideo.srcObject = evt.stream;
-                    //remotevideo.src = window.URL.createObjectURL(evt.stream);
                 }
 
                 e.target.disabled = true;

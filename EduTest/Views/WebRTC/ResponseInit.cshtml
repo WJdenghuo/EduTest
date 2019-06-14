@@ -1,0 +1,105 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    @*<script src="https://cdn.bootcss.com/socket.io/2.2.0/socket.io.js"></script>*@
+    <script src="https://cdn.bootcss.com/adapterjs/0.15.4/adapter.min.js"></script>
+    <script src="https://cdn.bootcss.com/adapterjs/0.15.4/adapter.screenshare.min.js"></script>
+    <title>ResponseInit</title>
+</head>
+<body>
+    <video id="local_video" autoplay></video>
+    <video id="remote_video" autoplay></video>
+
+    <script>
+
+        var pc = null;
+        var ice = {
+            "iceServers": [
+                { "url": "stun:62.234.105.58:3478" },
+                { "url": "turn:62.234.105.58:3478", "username": "cnki", "credential": "123456" }
+            ]
+        };
+        var connection = null;
+        signalrInit();
+        connection.on("ReceiveMessage", function (user, message) {
+            if (message.offer) {
+                pc = new RTCPeerConnection(ice);
+                pc.setRemoteDescription(message.offer);
+
+                pc.onicecandidate = function (evt) {
+                    if (evt.candidate) {
+                        signalingChannel.send(evt.candidate);
+                    }
+                }
+
+                pc.onaddstream = function (evt) {
+                    var remote_video = document.getElementById('remote_video');
+                    remote_video.src = window.URL.createObjectURL(evt.stream);
+                }
+
+                navigator.getUserMedia({ "audio": true, "video": true },
+                    gotStream, logError);
+
+            } else if (message.candidate) {
+                pc.addIceCandidate(message.candidate);
+            }
+        })
+
+        function gotStream(evt) {
+            pc.addStream(evt.stream);
+
+            var local_video = document.getElementById('local_video');
+            local_video.src = window.URL.createObjectURL(evt.stream);
+
+            pc.createAnswer(function (answer) {
+                pc.setLocalDescription(answer);
+                sendMessage("SendMessage", "remote", answer.sdp);
+            });
+        }
+
+        function logError() {
+
+        }
+
+        /*
+        *  ********************初始化信令**************************
+        */
+        async function signalrInit(eventName, value, message) {
+
+            connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+            connection.start().catch(err => console.error(err.toString()));
+
+            var timer;
+            function myfunction() {
+                console.log(connection.connectionState);
+                if (connection.connectionState) {
+                    connection.invoke(eventName, value, message).catch(function (err) {
+                        return console.error(err.toString());
+                    });
+                    window.clearInterval(timer);
+                }
+            }
+            timer = window.setInterval(myfunction, 500);
+        }
+        async function sendMessage(eventName, value, message) {
+            if (connection.connectionState) {
+                connection.invoke(eventName, value, message).catch(function (err) {
+                    return console.error(err.toString());
+                });
+            }
+            else {
+                await signalrInit(eventName, value, message);
+            }
+        }
+    </script>
+</body>
+</html>
