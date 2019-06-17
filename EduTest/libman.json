@@ -176,6 +176,32 @@
         "package.json",
         "README.md"
       ]
+    },
+    {
+      "library": "rtmp-streamer@1.0.2",
+      "destination": "wwwroot/lib/rtmp-streamer/",
+      "files": [
+        "bower.json",
+        "package.json",
+        "README.md",
+        "rtmp-streamer.iml",
+        "rtmp-streamer.js",
+        "rtmp-streamer.min.js",
+        "RtmpStreamer.as",
+        "RtmpStreamer.swf",
+        ".idea/compiler.xml",
+        ".idea/encodings.xml",
+        ".idea/flexCompiler.xml",
+        ".idea/misc.xml",
+        ".idea/modules.xml",
+        ".idea/uiDesigner.xml",
+        ".idea/vcs.xml",
+        ".idea/workspace.xml",
+        ".idea/copyright/profiles_settings.xml",
+        "demo/index.html",
+        "demo/main.js",
+        "demo/require.js"
+      ]
     }
   ]
 }

@@ -37,7 +37,7 @@
         };
         var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();;
         var pc = null;
-        var constraints = window.constraints = {
+        var constraints = /*window.constraints =*/ {
             audio: false,
             video: {
                 frameRate: { ideal: 10, max: 15 }
@@ -52,7 +52,7 @@
             var videoTracks = stream.getVideoTracks();
             console.log('Got stream with constraints:', constraints);
             console.log(`Using video device: ${videoTracks[0].label}`);
-            window.stream = stream; // make variable available to browser console
+            //window.stream = stream; // make variable available to browser console
             video.srcObject = stream;
         }
 
@@ -145,6 +145,7 @@
                     console.log('ICE connection state change: ' + evt.target.iceConnectionState);
                 };
                 pc.onicecandidate = function (evt) {
+                    console.log(evt);
                     console.log("onicecandidate:"+evt.target.iceGatheringState);
                     if (evt.target.iceGatheringState == "complete") {
                         pc.createOffer(function (offer) {
@@ -193,20 +194,42 @@
                             console.log('Got remote stream with constraints:', constraints);
                             console.log(`Using remote video device: ${videoTracks[0].label}`);
                             remotevideo.srcObject = evt.stream;
-                            window.stream = evt.stream;
-                            //
+                            //window.stream = evt.stream;
+
+
+                            //本地视频流采集推送
 
                             //pc = new RTCPeerConnection(ice);
-                            //var stream = navigator.mediaDevices.getUserMedia(constraints);
-                            //pc.addStream(stream);
+                            ////var stream = navigator.mediaDevices.getUserMedia(constraints);
+                            ////pc.addStream(stream);
+                            //captureStream = navigator.mediaDevices.getDisplayMedia();
 
-                            //handleSuccess(stream);
+                            //var timer;
+                            //var count = 0;
+                            //function myfunction() {
+                            //    console.log(connection.connectionState);
 
-                            ////收集本地媒体消息
-                            //pc.createOffer(function (offer) {
-                            //    pc.setLocalDescription(offer);
-                            //    sendMessage("SendMessage", $("#UserName").val(), offer);
-                            //}, function (error) { console.log(error); });
+                            //    //count++;
+                            //    //if (count > 3) {
+                            //    //    window.clearInterval(timer);
+                            //    //    count = 0;
+                            //    //}
+
+                            //    if (captureStream) {
+                            //        console.log(captureStream);
+                            //        pc.addTrack(captureStream.getVideoTracks(), captureStream);
+                            //        handleSuccess(captureStream);
+
+                            //        //收集本地媒体消息
+                            //        pc.createOffer(function (offer) {
+                            //            pc.setLocalDescription(offer);
+                            //            sendMessage("SendMessage", $("#UserName").val(), offer);
+                            //        }, function (error) { console.log(error); });
+                            //        window.clearInterval(timer);
+                            //    }
+                            //}
+                            //timer = window.setInterval(myfunction, 1000);
+                          
                         }
                     }
                     if (message.type == "answer") {

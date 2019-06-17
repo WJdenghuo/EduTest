@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using AspNetCoreRateLimit;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Edu.Entity;
 using Edu.Entity.MySqlEntity;
@@ -108,6 +109,24 @@ namespace EduTest
                    
                     };
                 });
+            /*
+             * ********************RateLimit***********************
+             */
+            // needed to load configuration from appsettings.json
+            services.AddOptions();
+
+            // needed to store rate limit counters and ip rules
+            services.AddMemoryCache();
+
+            //load general configuration from appsettings.json
+            services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
+
+            //load ip rules from appsettings.json
+            services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
+
+            // inject counter and rules stores
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
 
             //
             services.AddMvc(options =>
@@ -133,6 +152,15 @@ namespace EduTest
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
+
+            // https://github.com/aspnet/Hosting/issues/793
+            // the IHttpContextAccessor service is not registered by default.
+            // the clientId/clientIp resolvers use it.
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            // configuration (resolvers, counter key builders)
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
             services.AddSignalR();
             //使用autofac替换容器后，启动速度会慢很多。
             services.AddOptions();
@@ -176,6 +204,8 @@ namespace EduTest
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
+
+            app.UseIpRateLimiting();
 
             app.UseMvc(routes =>
             {

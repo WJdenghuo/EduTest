@@ -28,6 +28,8 @@
     <a href="@Url.Action("ResponseInit","WebRTC")" target="_blank">remote</a>
     <a href="@Url.Action("SimpleWebRTC","WebRTC")" target="_blank">SimpleWebRTC</a>
     <a href="@Url.Action("Index2","WebRTC")" target="_blank">Index2</a>
+    <object></object>
+    <embed id="rtmp-streamer" src="~/lib/rtmp-streamer/RtmpStreamer.swf" bgcolor="#999999" quality="high" width="320" height="240" allowScriptAccess="sameDomain" type="application/x-shockwave-flash"/>
     <script id="showVideo">
         var ice = {
             "iceServers": [
@@ -36,11 +38,16 @@
             ]/*, "sdpSemantics": 'plan-b'*/
         };
         var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();;
-      
+
         $(function () {
             //document.querySelector('#showVideo').addEventListener('click', e => init(e));
             document.querySelector('#showVideo').addEventListener('click', e => rtcInit(e));
             //document.querySelector('#showVideo').addEventListener('click', function () { signalrInit("SendMessage","test","hello")});
+
+            //require(["rtmp-streamer"], function (RtmpStreamer) {
+            //    var streamer = new RtmpStreamer(document.getElementById('rtmp-streamer'));
+            //    streamer.publish(url, window.stream);
+            //});
         })
         var constraints = window.constraints = {
             audio: false,
@@ -79,7 +86,7 @@
             }
         }
 
-       
+
         function logError() { }
 
         /*
@@ -99,7 +106,7 @@
             await start();
         });
         async function signalrInit(eventName, value, message) {
-           
+
             //connection.start().catch(err => console.error(err.toString()));
             await start();
 
@@ -109,13 +116,13 @@
                 console.log(connection.connectionState);
 
                 count++;
-                if (count>3) {
+                if (count > 3) {
                     window.clearInterval(timer);
                     count = 0;
                 }
-               
+
                 if (connection.connectionState) {
-                    
+
                     connection.invoke(eventName, value, message).catch(function (err) {
                         console.error("如果房间内第一个用户进入发生该错误，请不要在意，服务端为Clients.Others.SendAsync（），因为该房间内没有其他用户，所以服务端会发生错误；");
                         return console.error(err.toString());
