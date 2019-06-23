@@ -1,0 +1,28 @@
+﻿@model List<Edu.Models.Models.MeetModel>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+    <div>
+        @if (Model.Any()&&Model.Count>0)
+        {
+            foreach (var item in Model)
+            {
+                <div>
+                    <img src="@item.Photo" />
+                    <strong>@item.Title</strong>
+                    <p>@item.MemberName</p>
+                </div>
+            }
+        }
+    </div>
+</body>
+</html>

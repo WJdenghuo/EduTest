@@ -7,5 +7,33 @@
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 <div>
-    <a href="@Url.Action("Index","WebRTC")" target="_blank">WebRTC</a>
+    <ul>
+        <li>
+            <a href="@Url.Action("Index","WebRTC")" target="_blank">WebRTC</a>
+        </li>
+        <li>
+            <a href="@Url.Action("Index","Upload")" target="_blank">Upload</a>
+        </li>
+        <li>
+            <a href="@Url.Action("Index","MQTTAndMedia")" target="_blank">MQTTAndMedia</a>
+        </li>
+
+    </ul>
+    <ul title="研讨驾驶舱demo">
+        <li>
+            <a href="@Url.Action("Index","Discussion")" target="_blank">研讨驾驶舱demo</a>
+        </li>
+        <li>
+            <a href="@Url.Action("Detail","Discussion")" target="_blank">研讨驾驶舱详情页</a>
+        </li>
+    </ul>
+
+    <ul title="登录、注册">
+        <li>
+            <a href="@Url.Action("Login","Account")" target="_blank">登录</a>
+        </li>
+        <li>
+            <a href="@Url.Action("Register","Account")" target="_blank">注册</a>
+        </li>
+    </ul>
 </div>

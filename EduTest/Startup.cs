@@ -21,9 +21,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -52,6 +54,25 @@ namespace EduTest
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            /*
+             * ********************RateLimit***********************
+             */
+            // needed to load configuration from appsettings.json
+            services.AddOptions();
+
+            // needed to store rate limit counters and ip rules
+            services.AddMemoryCache();
+
+            //load general configuration from appsettings.json
+            services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
+
+            //load ip rules from appsettings.json
+            services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
+
+            // inject counter and rules stores
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+
             services.Configure<RedisSetting>(Configuration);
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -88,7 +109,7 @@ namespace EduTest
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(x =>
                 {
-                    x.LoginPath = new PathString("/Account/Admin_login");
+                    x.LoginPath = new PathString("/Account/Login");
                     x.ExpireTimeSpan= new TimeSpan(0, 0, 30, 0, 0);
                     //x.AccessDeniedPath = "";
                 })
@@ -109,24 +130,6 @@ namespace EduTest
                    
                     };
                 });
-            /*
-             * ********************RateLimit***********************
-             */
-            // needed to load configuration from appsettings.json
-            services.AddOptions();
-
-            // needed to store rate limit counters and ip rules
-            services.AddMemoryCache();
-
-            //load general configuration from appsettings.json
-            services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
-
-            //load ip rules from appsettings.json
-            services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
-
-            // inject counter and rules stores
-            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
-            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
 
             //
             services.AddMvc(options =>
@@ -135,6 +138,7 @@ namespace EduTest
 
                 //options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
                 //options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+
                 options.Filters.Add(typeof(HttpGlobalExceptionFilter));
                 options.Filters.Add(typeof(ValidateModelStateFilter));
             })
@@ -189,8 +193,20 @@ namespace EduTest
             }
 
             //app.UseHttpsRedirection();
+            //实现非静态文件根目录的支持
+            //var provider = new FileExtensionContentTypeProvider();
+            //provider.Mappings.Remove(".exe");
+            //app.UseStaticFiles(new StaticFileOptions()
+            //{
+            //    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"File")),
+            //    RequestPath = new PathString("/File"),
+            //    OnPrepareResponse = ctx =>
+            //    {
+            //        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=600");
+            //    },
+            //    ContentTypeProvider = provider
+            //});
             app.UseStaticFiles();
-
             //
             app.UseCookiePolicy();
             app.UseAuthentication();
@@ -205,7 +221,7 @@ namespace EduTest
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
 
-            app.UseIpRateLimiting();
+            //app.UseIpRateLimiting();
 
             app.UseMvc(routes =>
             {

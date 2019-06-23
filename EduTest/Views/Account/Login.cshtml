@@ -1,0 +1,69 @@
+﻿@model Edu.Models.Models.LoginModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Login</title>
+    <script src="~/Tookit/inspinia_admin/js/jquery-2.1.1.js"></script>
+    <script src="~/Scripts/jquery.form.js"></script>
+    <script src="~/Tookit/layui/layui.js"></script>
+    <script type="text/javascript">
+        layui.use('layer');
+    </script>
+</head>
+<body>
+    <form id="fm" method="post" enctype="multipart/form-data" asp-controller="Account" asp-action="Login">
+        @Html.ValidationSummary()
+        <div class="form-group">
+            <label></label>
+            <div class="col-md-10">
+                @Html.TextBoxFor(x => x.Account)
+            </div>
+        </div>
+        <div class="form-group">
+            <label></label>
+            <div class="col-md-10">
+                @Html.PasswordFor(x => x.Password)
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-10">
+                <input id="submit" type="button" value="登录">
+            </div>
+        </div>
+    </form>
+    <script type="text/javascript">
+        $(function () {
+            $('.m-t').validation();
+        })
+
+        $("#submit").click(function () {
+            var load = layer.load();
+            //异步提交
+            $('#fm').ajaxSubmit(function (data) {
+                layer.close(load);
+                if (data.r) {
+                    layer.msg("登录成功");
+                    if (data.url == "") {
+                        window.location.href = "/Home/Index";
+                    }
+                    else {
+                        window.location.href = data.url;
+                    }
+
+                }
+                else {
+                    layer.alert(data.m);
+                }
+            });
+            return false;
+
+        })
+    </script>
+</body>
+
+</html>

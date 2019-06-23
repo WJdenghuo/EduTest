@@ -1,0 +1,273 @@
+﻿@using Edu.Entity.MySqlEntity
+@model Meet
+
+<div class="ibox">
+    <div class="ibox-title">
+        <h5>会议信息 </h5>
+        <a class="fullscreen-link pull-right">
+            <i class="fa fa-expand"></i>
+        </a>
+    </div>
+    <div class="ibox-content">
+        <div class="row">
+            <div class="col-xs-12">
+                @using (Html.BeginForm("Create", "Meet", FormMethod.Post, new { @id = "fm", @class = "form-horizontal", enctype = "multipart/form-data" }))
+                {
+                    @Html.HiddenFor(p => p.ID)
+                    @*@Html.Hidden("refUrl", ViewBag.refUrl as object)*@
+                    <div class="form-group">
+                        <label for="Title" class="col-sm-3 control-label">会议名称</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(p => p.Title, new { @class = "form-control", placeholder = "会议名称", checktype = "required", requiredmessage = "*" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="Des" class="col-sm-3 control-label">简介</label>
+                        <div class="col-sm-6">
+                            @Html.TextAreaFor(p => p.Des, new { @class = "form-control", placeholder = "简介", checktype = "required", requiredmessage = "*", })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Photo" class="col-sm-3 control-label">封面图片</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(p => p.Photo, new { @class = "form-control", placeholder = "封面图片" })
+                            <img id="uploadPhoto" maxwidth="300" maxheight="300" />
+                        </div>
+                        <button id="changeheadimg">选择图片></button>
+                    </div>
+                    <div class="form-group">
+                        <label for="Member" class="col-sm-3 control-label">与会人员</label>
+                        <div class="col-sm-6">
+
+                            @Html.TextBoxFor(p => p.Member, new { @class = "form-control", placeholder = "与会人员" })
+                            
+                            <a id="menuBtn" href="#" onclick="showMenu(); return false;">请选择</a>
+                            <div id="menuContent" class="menuContent" style="display:none; position: absolute;">
+                                <ul id="treeDemo" class="ztree" style="margin-top:0; width:auto;background:white"></ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 20px;">
+
+                        <div class="col-sm-offset-3 col-sm-5">
+                            <button type="button" id="btnSave" class="btn btn-info col-sm-2">确 定</button>
+                            <a href="@Url.Action("Index")" id="btnback" class="btn col-sm-2 btn-default col-sm-offset-1">返回</a>
+                        </div>
+
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+
+        $("#btnSave").click(function () {
+
+            //if ($("#fm").valid() == false) {
+            //    return false;
+            //}
+            //if ($(".form-group").hasClass("has-error")) {
+            //    return false;
+            //}
+            var load = layer.load();
+            $("#Photo").val(photoPath);
+            //异步提交
+            $('#fm').ajaxSubmit(function (data) {
+                layer.close(load);
+                if (data.r) {
+                    layer.msg("操作成功");
+                    window.location.href = "@Url.Action("Index")";
+                }
+                else {
+                    layer.alert(data.m);
+                }
+            });
+            return false;
+
+        })
+    })
+</script>
+<script src="~/lib/webuploader/dist/webuploader.js"></script>
+<script>
+    var photoPath = "";
+    var applicationPath = window.applicationPath === "" ? "" : window.applicationPath || "../../";
+    $(function () {
+        uploader = WebUploader.create({
+            // 选完文件后，是否自动上传。
+            auto: true,
+
+            disableGlobalDnd: true,
+            // swf文件路径
+            swf: "~/lib/webuploader/dist/Uploader.swf",
+
+            // 文件接收服务端。
+            server: "/Upload/PostFiles/",
+
+            // 选择文件的按钮。可选。
+            // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+            pick: '#changeheadimg',
+
+            //只允许选择图片
+            accept: {
+                title: 'Images',
+                extensions: 'gif,jpg,jpeg,bmp,png',
+                mimeTypes: 'image/*'
+            },
+            fileNumLimit: 1,
+            duplicate: true,
+            //压缩
+            compress: {
+                width: 720,
+                height: 720,
+
+                // 图片质量，只有type为`image/jpeg`的时候才有效。
+                quality: 90,
+
+                // 是否允许放大，如果想要生成小图的时候不失真，此选项应该设置为false.
+                allowMagnify: false,
+
+                // 是否允许裁剪。
+                crop: false,
+
+                // 是否保留头部meta信息。
+                preserveHeaders: true,
+
+                // 如果发现压缩后文件大小比原来还大，则使用原来图片
+                // 此属性可能会影响图片自动纠正功能
+                noCompressIfLarger: false,
+
+                // 单位字节，如果图片大小小于此值，不会采用压缩。
+                compressSize: 1024 * 1024 * 5
+            },
+        });
+
+        uploader.on('uploadSuccess', function (file, response) {
+            uploader.refresh();
+            if (response.count > 0) {
+                photoPath = response.filePath;
+                $("#uploadPhoto").attr("src", photoPath);
+                uploader.refresh();
+                console.log(photoPath);
+            }
+            //window.setTimeout(function () { window.location.reload(); }, 500);
+        });
+
+        uploader.on('uploadError', function (file, response) {
+            uploader.refresh();
+            layer.msg(response);
+            window.setTimeout(function () { window.location.reload(); }, 500);
+            //uploader.refresh();
+        });
+    });
+</script>
+<link href="~/lib/zTree.v3/css/zTreeStyle/zTreeStyle.css" rel="stylesheet" />
+<script src="~/lib/zTree.v3/js/jquery.ztree.all.js"></script>
+<script type="text/javascript">
+    //zTree配置
+    var setting = {
+        view: {
+            expandSpeed: 100,
+            selectedMulti: true,
+            //dblClickExpand: false
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+            beforeClick: beforeClick,
+            onClick: onClick,
+            //onAsyncSuccess: onAsyncSuccess
+        }
+    };
+    //针对主干不可选（叶可选）
+    function beforeClick(treeId, treeNode) {
+        //var check = (treeNode && !treeNode.isParent);
+        //if (!check) alert("Do not select province...");
+        //return check;
+    }
+
+    function onClick(e, treeId, treeNode) {
+        var zTree = $.fn.zTree.getZTreeObj("treeDemo"),
+		nodes = zTree.getSelectedNodes(),
+		v = "";
+        id=""
+        nodes.sort(function compare(a, b) { return a.id - b.id; });
+        for (var i = 0, l = nodes.length; i < l; i++) {
+            v += nodes[i].name + ",";
+            id += nodes[i].id + ",";
+        }
+        if (v.length > 0) v = v.substring(0, v.length - 1);
+        if (id.length > 0) id = id.substring(0, id.length - 1);
+        var cityObj = $("#Member");
+        cityObj.attr("value", v);
+        //$("#OrganShipID").val(id);
+    }
+
+    function showMenu() {
+        var cityObj = $("#OrganShipName");
+        var cityOffset = $("#OrganShipName").offset();
+        //$("#menuContent").css({ left: cityOffset.left + "px", top: cityOffset.top + cityObj.outerHeight() + "px" }).slideDown("fast");
+        $("#menuContent").slideDown("fast");
+
+        $("body").bind("mousedown", onBodyDown);
+    }
+    function hideMenu() {
+        $("#menuContent").fadeOut("fast");
+        $("body").unbind("mousedown", onBodyDown);
+    }
+    function onBodyDown(event) {
+        if (!(event.target.id == "menuBtn" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length > 0)) {
+            hideMenu();
+        }
+    }
+    //异步树数据
+    $(document).ready(function () {
+        $.ajax({
+            url: '/Admin/Meet/SelectUser',
+            type: 'POST',
+            dataType: 'json',
+            timeout: 3000,
+            cache: false,
+            beforeSend: LoadFunction,
+            error: erryFunction,
+            success: succFunction
+        })
+        //成功执行方法
+        function succFunction(data) {
+            var json = eval(data); //数组
+            var treeIndex = 0;
+            window.setTimeout(function () { $.fn.zTree.init($("#treeDemo"), setting, json); },500);
+
+            @*if ('@Model.OrganShipID.HasValue') {
+                $.each(json, function (index, item) {
+                    if (this.id == '@Model.OrganShipID.Value') {
+                        this.checked = true;
+                        treeIndex = index;
+                    }
+                });
+                $.fn.zTree.init($("#treeDemo"), setting, json);
+                //默认选中,回显
+                var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+                var node = treeObj.getNodesByParam("id", '@Model.OrganShipID.Value', null);
+                treeObj.selectNode(node);
+            }
+            else {
+                $.fn.zTree.init($("#treeDemo"), setting, json);
+            }*@
+        }
+        //加载执行方法
+        function LoadFunction() {
+        }
+        //错误执行方法
+        function erryFunction(data) {
+            console.log(data);
+        }
+    });
+</script>

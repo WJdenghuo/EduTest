@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>直播会议</title>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="css/Element-UI/index.css">  
+  <link rel="stylesheet" type="text/css" href="css/iconfont.css">
+  <link rel="stylesheet" type="text/css" href="css/style.css"> 
+</head>
+<body>
+<div id="app">
+  <el-container>
+     <!-- 顶部 -->
+     <el-header class="vh-top">
+         <h1>让设计更有说服力的20条经典原则：伯斯塔尔法则、系列位置效应</h1>
+         <span>主持人：刘炎</span>
+     </el-header>
+     <!-- 主体内容 -->
+     <el-main class="v-main">
+        <!-- 右侧-讨论区 -->
+        <div class="video-r">
+               <!-- 点击此按钮可以收起右侧 点击时给div加类名r0-->
+               <span class="iconfont icon-rightJ"></span>
+               <p><i class="iconfont icon-chat"></i><span class="font-s18">讨论区</span></p>
+               <!-- 讨论区内容 -->
+               <el-scrollbar class="vr-con clearfix">
+                   <div class="vrc-item">
+                       <p class="clearfix lihe30">
+                          <span class="float-l"><img src="images/headImg.jpg" class="head-simg mr10" /><span class="mem-width color-9">刘炎</span></span>
+                          <span class="float-r color-9">2019/09/25  15:30:15</span>
+                       </p>
+                       <p class="vrci-txt">
+                          从WPC放出的图片看，黑乎乎外形跟之前Mophie的设 计没啥差别。它首先很是手机壳，内部带有1720毫安时 电池，号称可以给是手机壳，内部带有1720毫安时 电池，号称可以给安时 电池，号称可以给安时 电池，号称可以给
+                       </p>
+                   </div>
+                   <div class="vrc-item">
+                       <p class="clearfix lihe30">
+                          <span class="float-l"><img src="images/headImg.jpg" class="head-simg mr10" /><span class="mem-width color-9">刘炎</span></span>
+                          <span class="float-r color-9">2019/09/25  15:30:15</span>
+                       </p>
+                       <p class="vrci-txt">
+                          从WPC放出的图片看，黑乎乎外形跟之前Mophie的设 计没啥差别。它首先很是手机壳，内部带有1720毫安时 电池，号称可以给是手机壳，内部带有1720毫安时 电池，号称可以给安时 电池，号称可以给安时 电池，号称可以给
+                       </p>
+                   </div>
+               </el-scrollbar>
+               <div class="vr-bot">
+                   <el-popover placement="top" trigger="click" popper-class="pop-text">
+                      <el-button slot="reference" class="btn-blue " type="primary">发表意见</el-button>
+                      <el-input type="textarea"></el-input>
+                   </el-popover>
+               </div>
+        </div>
+        <!-- 左侧-参与人 -->
+        <div class="video-l">
+           <div class="vl-top clearfix">
+              <p class="float-l font-s18"><i class="iconfont icon-cy"></i>参与人<i class="color-6 font-s16">（8/20）</i></p>
+              <el-button type="primary" class="float-r btn-blue btn-s">申请发言</el-button>
+           </div>
+           <el-scrollbar class="vl-con clearfix">
+              <!-- 第一种状态 -->
+              <div class="vlc-item"><img src="images/videoImg.jpg" /><span>易烊千玺</span></div>
+              <!-- 第二种状态 -->
+              <div class="vlc-item vlc-itemt"><i class="iconfont icon-viImgf"></i><span>千玺</span></div>
+              <!-- 第三种状态 -->
+              <div class="vlc-item vlc-itemth"><i class="iconfont icon-under"></i><span>千玺</span></div>
+           </el-scrollbar>
+        </div>
+        <div class="video-con">
+           <div class="vc-top">
+               <div class="vct-top"><img src="images/videoImgB.jpg" width="1100" height="610" /></div>
+               <div class="vct-bot"><img src="images/videoImg.jpg" /></div>
+           </div>
+        </div>
+     </el-main>
+  </el-container>
+</div>
+  <script src="js/vue.js"></script>
+  <!-- 引入组件库 -->
+  <script src="js/index.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data: function() {
+        return { visible: false,
+         }
+      }
+    })
+  </script>
+</body>
+</html>

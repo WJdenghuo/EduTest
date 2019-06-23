@@ -28,8 +28,8 @@
     <a href="@Url.Action("ResponseInit","WebRTC")" target="_blank">remote</a>
     <a href="@Url.Action("SimpleWebRTC","WebRTC")" target="_blank">SimpleWebRTC</a>
     <a href="@Url.Action("Index2","WebRTC")" target="_blank">Index2</a>
-    <object></object>
-    <embed id="rtmp-streamer" src="~/lib/rtmp-streamer/RtmpStreamer.swf" bgcolor="#999999" quality="high" width="320" height="240" allowScriptAccess="sameDomain" type="application/x-shockwave-flash"/>
+    @*<object></object>
+    <embed id="rtmp-streamer" src="~/lib/rtmp-streamer/RtmpStreamer.swf" bgcolor="#999999" quality="high" width="320" height="240" allowScriptAccess="sameDomain" type="application/x-shockwave-flash"/>*@
     <script id="showVideo">
         var ice = {
             "iceServers": [
@@ -193,6 +193,11 @@
                         pc.addIceCandidate(message);
                     }
                     if (message.type == "offer") {
+
+                        /*
+                         * 信令控制中很重要的一步就是，当远端发生变化是，通过信令消息通知其他客户端 new RTCPeerConnection
+                         * 重新获取ice候选人，检测新的远端媒体流
+                         */
 
                         pc = new RTCPeerConnection(ice);
                         pc.setRemoteDescription(message);
