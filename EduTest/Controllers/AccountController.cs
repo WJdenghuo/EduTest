@@ -145,7 +145,8 @@ namespace EduTest.Controllers
             Edu.Entity.MySqlEntity.UserInfo userInfo = new Edu.Entity.MySqlEntity.UserInfo()
             {
                 UserName= userDto.UserName,
-                Pwd= MD5Helper.GetMD5String(userDto.Password)
+                Pwd= MD5Helper.GetMD5String(userDto.Password),
+                Guid=Guid.NewGuid().ToString(),
             };
             await _baseEduContext.UserInfo.AddAsync(userInfo);
             if (await _baseEduContext.SaveChangesAsync()>0)
