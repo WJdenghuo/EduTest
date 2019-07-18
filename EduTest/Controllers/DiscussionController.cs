@@ -4,10 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Edu.Entity.MySqlEntity;
 using Edu.Models.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EduTest.Controllers
 {
+    [Authorize]
     public class DiscussionController : Controller
     {
         private readonly BaseEduContext _baseEduContext;

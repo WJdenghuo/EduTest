@@ -147,6 +147,7 @@ namespace EduTest.Controllers
                 UserName= userDto.UserName,
                 Pwd= MD5Helper.GetMD5String(userDto.Password),
                 Guid=Guid.NewGuid().ToString(),
+                States=1
             };
             await _baseEduContext.UserInfo.AddAsync(userInfo);
             if (await _baseEduContext.SaveChangesAsync()>0)

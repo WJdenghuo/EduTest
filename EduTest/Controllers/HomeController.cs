@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using UserInfo = Edu.Entity.MySqlEntity.UserInfo;
 using Edu.Tools.Redis;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Http.Features;
+using System.IO;
+using Aspose.Pdf;
 
 namespace EduTest.Controllers
 {
@@ -79,6 +82,22 @@ namespace EduTest.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+        public bool OkCookie()
+        {
+            var consentFeature = HttpContext.Features.Get<ITrackingConsentFeature>();
+            consentFeature.GrantConsent();
+            return true;
+        }
+        public IActionResult AsposePDF()
+        {
+            using (var stream=new MemoryStream())
+            {
+                var pdf = new Aspose.Pdf.Document(stream);
+                pdf.Save("", SaveFormat.Html);
+            }
+            
+            return View();
         }
     }
 }

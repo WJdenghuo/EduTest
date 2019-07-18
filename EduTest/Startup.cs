@@ -11,6 +11,8 @@ using Edu.Service.MediatR;
 using Edu.Tools.Redis;
 using EduTest.Hubs;
 using EduTest.Infrastructure.Filters;
+using EduTest.Infrastructure.HostedService;
+using EduTest.Infrastructure.Middlewares;
 using IdentityModel;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -18,6 +20,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -54,6 +57,7 @@ namespace EduTest
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+
             /*
              * ********************RateLimit***********************
              */
@@ -77,8 +81,9 @@ namespace EduTest
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
+                options.CheckConsentNeeded = context => false;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
+                options.Secure = CookieSecurePolicy.None;
             });
 
             //mysql
@@ -104,6 +109,7 @@ namespace EduTest
                 configuration.ResolveDns = true;
                 return ConnectionMultiplexer.Connect(configuration);
             });
+            services.AddHostedService<TimedHostedService>();
 
             JWTTokenOptions jwtTokenOptions = new JWTTokenOptions();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -111,6 +117,8 @@ namespace EduTest
                 {
                     x.LoginPath = new PathString("/Account/Login");
                     x.ExpireTimeSpan= new TimeSpan(0, 0, 30, 0, 0);
+                    //x.CookieSecure = CookieSecurePolicy.None;
+                    x.Cookie.SecurePolicy = CookieSecurePolicy.None;
                     //x.AccessDeniedPath = "";
                 })
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, o =>
@@ -157,6 +165,11 @@ namespace EduTest
                 c.IncludeXmlComments(xmlPath);
             });
 
+            services.AddCors(options => 
+            {
+                options.AddPolicy("janus",p => p.AllowAnyOrigin());
+            });
+
             // https://github.com/aspnet/Hosting/issues/793
             // the IHttpContextAccessor service is not registered by default.
             // the clientId/clientIp resolvers use it.
@@ -191,7 +204,11 @@ namespace EduTest
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
+            //反向代理
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
             //app.UseHttpsRedirection();
             //实现非静态文件根目录的支持
             //var provider = new FileExtensionContentTypeProvider();
@@ -223,6 +240,9 @@ namespace EduTest
 
             //app.UseIpRateLimiting();
 
+            //中间件测试
+            app.UseRequestUser();
+            app.UseCors("janus");
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

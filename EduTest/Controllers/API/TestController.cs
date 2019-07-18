@@ -64,7 +64,7 @@ namespace EduTest.Controllers.API
         }
         [HttpGet]
         [Route("GetString")]
-        public String GetString()
+        public String GetString(String test)
         {
             return "测试2";
         }
