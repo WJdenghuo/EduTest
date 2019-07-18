@@ -93,7 +93,13 @@ namespace EduTest
                     Configuration.GetConnectionString("DefaultConnection"),
                     //弹性连接,命令超时
                     mySqlOptions => mySqlOptions.EnableRetryOnFailure().CommandTimeout(3)));
-            
+            //PostGre
+            //services.AddDbContextPool<BaseEduContext>(options =>
+            //    options.UseLazyLoadingProxies().UseNpgsql(
+            //        Configuration.GetConnectionString("PostGreSQLConnection"),
+            //        //弹性连接,命令超时
+            //        mySqlOptions => mySqlOptions.EnableRetryOnFailure().CommandTimeout(3)));
+
             //
             services.AddTransient(typeof(IAsyncRepository<>), typeof(SugarRepository<>));
             services.AddTransient(typeof(IRepository<>), typeof(SugarRepository<>));
