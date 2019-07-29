@@ -1,0 +1,304 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Janus WebRTC Server: Video Room Demo</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/6.0.3/adapter.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.2/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.1.0/bootbox.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.3/toastr.min.js"></script>
+    <script src="~/janus/js/janus.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/cerulean/bootstrap.min.css" type="text/css" />
+    <link href="~/janus/css/demo.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.3/toastr.css" />
+</head>
+<body>
+    <header>
+
+    </header>
+    <main>
+        <input type="text" placeholder="请输入用户名" id="userName"/><button id="start">加入</button>
+        <video id="local" width="300" height="300" autoplay></video>
+        <video id="remote" width="300" height="300" autoplay></video>
+    </main>
+    <footer>
+       
+    </footer>
+    <script>
+        var server = "https://www.guoshuai.xyz/janus";
+        //if (window.location.protocol === 'http:')
+        //    server = "http://" + window.location.hostname + ":8088/janus";
+        //else
+        //    server = "https://" + window.location.hostname + ":8089/janus";
+
+        var janus = null;
+        var sfutest = null;
+        var opaqueId = "videoroomtest-" + 1;
+
+        var myroom = 1234;	// Demo room
+        var myusername = null;
+        var myid = null;
+        var mystream = null;
+        // We use this other ID just to map our subscriptions to us
+        var mypvtid = null;
+
+        var feeds = [];
+        var bitrateTimer = [];
+        $(function () {
+            Janus.init({
+                debug: "all", callback: function () {
+                    // Use a button to start the demo
+                    $('#start').one('click', function () {
+                        console.log("触发" + new Date());
+                        myusername = $("#userName").val();
+                        $(this).attr('disabled', true).unbind('click');
+                        // Make sure the browser supports WebRTC
+                        if (!Janus.isWebrtcSupported()) {
+                            bootbox.alert("No WebRTC support... ");
+                            return;
+                        }
+                        // Create session
+                        janus = new Janus(
+                            {
+                                server: server,
+                                iceServers: [{ urls: "turn:www.385073012.cn:3478", username: "cnki", credential: "123456" }],
+                                success: function () {
+                                    // Attach to video room test plugin
+                                    janus.attach(
+                                        {
+                                            plugin: "janus.plugin.videoroom",
+                                            opaqueId: opaqueId,
+                                            success: function (pluginHandle) {
+                                                sfutest = pluginHandle;
+                                                Janus.log("Plugin attached! (" + sfutest.getPlugin() + ", id=" + sfutest.getId() + ")");
+                                                Janus.log("  -- This is a publisher/manager"); 
+                                                registerUsername();
+                                            },
+                                            error: function (error) {
+                                                Janus.error("  -- Error attaching plugin...", error);
+                                                bootbox.alert("Error attaching plugin... " + error);
+                                            },
+                                            consentDialog: function (on) {
+                                                Janus.debug("Consent dialog should be " + (on ? "on" : "off") + " now");                                               
+                                            },
+                                            mediaState: function (medium, on) {
+                                                Janus.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
+                                            },
+                                            webrtcState: function (on) {                                              
+                                            },
+                                            onmessage: function (msg, jsep) {
+                                                Janus.debug(" ::: Got a message (publisher) :::");
+                                                Janus.debug(msg);
+                                                var event = msg["videoroom"];
+                                                Janus.debug("Event: " + event);
+                                                if (event != undefined && event != null) {
+                                                    if (event === "joined") {
+                                                        // Publisher/manager created, negotiate WebRTC and attach to existing feeds, if any
+                                                        myid = msg["id"];
+                                                        mypvtid = msg["private_id"];
+                                                        Janus.log("Successfully joined room " + msg["room"] + " with ID " + myid);
+                                                        publishOwnFeed(true);
+                                                        // Any new feed to attach to?
+                                                        if (msg["publishers"] !== undefined && msg["publishers"] !== null) {
+                                                            var list = msg["publishers"];
+                                                            Janus.debug("Got a list of available publishers/feeds:");
+                                                            Janus.debug(list);
+                                                            for (var f in list) {
+                                                                var id = list[f]["id"];
+                                                                var display = list[f]["display"];
+                                                                var audio = list[f]["audio_codec"];
+                                                                var video = list[f]["video_codec"];
+                                                                Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
+                                                                newRemoteFeed(id, display, audio, video);
+                                                            }
+                                                        }
+                                                    } else if (event === "destroyed") {
+                                                        // The room has been destroyed
+                                                        Janus.warn("The room has been destroyed!");
+                                                        bootbox.alert("The room has been destroyed", function () {
+                                                            window.location.reload();
+                                                        });
+                                                    } else if (event === "event") {
+                                                        // Any new feed to attach to?
+                                                        if (msg["publishers"] !== undefined && msg["publishers"] !== null) {
+                                                            var list = msg["publishers"];
+                                                            Janus.debug("Got a list of available publishers/feeds:");
+                                                            Janus.debug(list);
+                                                            for (var f in list) {
+                                                                var id = list[f]["id"];
+                                                                var display = list[f]["display"];
+                                                                var audio = list[f]["audio_codec"];
+                                                                var video = list[f]["video_codec"];
+                                                                Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
+                                                                newRemoteFeed(id, display, audio, video);
+                                                            }
+                                                        } 
+                                                    }
+                                                }
+                                                if (jsep !== undefined && jsep !== null) {
+                                                    Janus.debug("Handling SDP as well...");
+                                                    Janus.debug(jsep);
+                                                    sfutest.handleRemoteJsep({ jsep: jsep });                                                 
+                                                }
+                                            },
+                                            onlocalstream: function (stream) {
+                                                Janus.debug(" ::: Got a local stream :::");
+                                                mystream = stream;
+                                                Janus.debug(stream);
+                                                
+                                                Janus.attachMediaStream($('#local').get(0), stream);
+                                            },
+                                            onremotestream: function (stream) {
+                                                // The publisher stream is sendonly, we don't expect anything here
+                                            },
+                                            oncleanup: function () {
+                                                Janus.log(" ::: Got a cleanup notification: we are unpublished now :::");
+                                            }
+                                        });
+                                },
+                                error: function (error) {
+                                    Janus.error(error);
+                                    bootbox.alert(error, function () {
+                                        window.location.reload();
+                                    });
+                                },
+                                destroyed: function () {
+                                    window.location.reload();
+                                }
+                            });
+                    });
+                }
+            });
+        })
+        function newRemoteFeed(id, display, audio, video) {
+            // A new feed has been published, create a new plugin handle and attach to it as a subscriber
+            var remoteFeed = null;
+            janus.attach(
+                {
+                    plugin: "janus.plugin.videoroom",
+                    opaqueId: opaqueId,
+                    success: function (pluginHandle) {
+                        remoteFeed = pluginHandle;
+                        remoteFeed.simulcastStarted = false;
+                        Janus.log("Plugin attached! (" + remoteFeed.getPlugin() + ", id=" + remoteFeed.getId() + ")");
+                        Janus.log("  -- This is a subscriber");
+                        // We wait for the plugin to send us an offer
+                        var subscribe = { "request": "join", "room": myroom, "ptype": "subscriber", "feed": id, "private_id": mypvtid };
+                        // In case you don't want to receive audio, video or data, even if the
+                        // publisher is sending them, set the 'offer_audio', 'offer_video' or
+                        // 'offer_data' properties to false (they're true by default), e.g.:
+                        // 		subscribe["offer_video"] = false;
+                        // For example, if the publisher is VP8 and this is Safari, let's avoid video
+                        if (Janus.webRTCAdapter.browserDetails.browser === "safari" &&
+                            (video === "vp9" || (video === "vp8" && !Janus.safariVp8))) {
+                            if (video)
+                                video = video.toUpperCase()
+                            toastr.warning("Publisher is using " + video + ", but Safari doesn't support it: disabling video");
+                            subscribe["offer_video"] = false;
+                        }
+                        remoteFeed.videoCodec = video;
+                        remoteFeed.send({ "message": subscribe });
+                    },
+                    error: function (error) {
+                        Janus.error("  -- Error attaching plugin...", error);
+                        bootbox.alert("Error attaching plugin... " + error);
+                    },
+                    onmessage: function (msg, jsep) {
+                        Janus.debug(" ::: Got a message (subscriber) :::");
+                        Janus.debug(msg);
+                        var event = msg["videoroom"];
+                        Janus.debug("Event: " + event);
+                        if (msg["error"] !== undefined && msg["error"] !== null) {
+                            bootbox.alert(msg["error"]);
+                        } else if (event != undefined && event != null) {
+                            if (event === "attached") {
+                                // Subscriber created and attached
+                                for (var i = 1; i < 6; i++) {
+                                    if (feeds[i] === undefined || feeds[i] === null) {
+                                        feeds[i] = remoteFeed;
+                                        remoteFeed.rfindex = i;
+                                        break;
+                                    }
+                                }
+                              
+                            } else if (event === "event") {
+                                // Check if we got an event on a simulcast-related event from this publisher                               
+                            } else {
+                                // What has just happened?
+                            }
+                        }
+                        if (jsep !== undefined && jsep !== null) {
+                            Janus.debug("Handling SDP as well...");
+                            Janus.debug(jsep);
+                            // Answer and attach
+                            remoteFeed.createAnswer(
+                                {
+                                    jsep: jsep,
+                                    // Add data:true here if you want to subscribe to datachannels as well
+                                    // (obviously only works if the publisher offered them in the first place)
+                                    media: { audioSend: false, videoSend: false },	// We want recvonly audio/video
+                                    success: function (jsep) {
+                                        Janus.debug("Got SDP!");
+                                        Janus.debug(jsep);
+                                        var body = { "request": "start", "room": myroom };
+                                        remoteFeed.send({ "message": body, "jsep": jsep });
+                                    },
+                                    error: function (error) {
+                                        Janus.error("WebRTC error:", error);
+                                        bootbox.alert("WebRTC error... " + JSON.stringify(error));
+                                    }
+                                });
+                        }
+                    },
+                    webrtcState: function (on) {
+                        Janus.log("Janus says this WebRTC PeerConnection (feed #" + remoteFeed.rfindex + ") is " + (on ? "up" : "down") + " now");
+                    },
+                    onlocalstream: function (stream) {
+                        // The subscriber stream is recvonly, we don't expect anything here
+                    },
+                    onremotestream: function (stream) {
+                        Janus.debug("Remote feed #" + remoteFeed.rfindex);
+                        
+                        Janus.attachMediaStream($('#remote').get(0), stream);
+                        var videoTracks = stream.getVideoTracks();
+                    },
+                    oncleanup: function () {
+                        
+                    }
+                });
+        }
+        function registerUsername() {
+           
+            var register = { "request": "join", "room": myroom, "ptype": "publisher", "display": myusername };
+            sfutest.send({ "message": register });
+        }
+        function publishOwnFeed(useAudio) {
+
+            sfutest.createOffer(
+                {
+                    // Add data:true here if you want to publish datachannels as well
+                    media: { audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true },	// Publishers are sendonly
+                    success: function (jsep) {
+                        Janus.debug("Got publisher SDP!");
+                        Janus.debug(jsep);
+                        var publish = { "request": "configure", "audio": useAudio, "video": true };
+                        sfutest.send({ "message": publish, "jsep": jsep });
+                    },
+                    error: function (error) {
+                        Janus.error("WebRTC error:", error);
+                        if (useAudio) {
+                            publishOwnFeed(false);
+                        } else {
+                            
+                        }
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

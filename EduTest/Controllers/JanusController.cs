@@ -12,5 +12,13 @@ namespace EduTest.Controllers
         {
             return View();
         }
+        public IActionResult Room()
+        {
+            return View();
+        }
+        public IActionResult RoomTest()
+        {
+            return View();
+        }
     }
 }

@@ -18,6 +18,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -28,16 +29,20 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MySqlConnector.Logging;
+using Newtonsoft.Json;
 using StackExchange.Redis;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net.Mime;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -85,6 +90,13 @@ namespace EduTest
                 options.MinimumSameSitePolicy = SameSiteMode.None;
                 options.Secure = CookieSecurePolicy.None;
             });
+            //HealthyChecks
+            //具体信息参照源码 https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks
+            services.AddHealthChecks()
+                .AddMySql(Configuration.GetConnectionString("DefaultConnection"))
+                .AddRedis(Configuration.GetConnectionString("RedisConnection")
+            );
+            services.AddHealthChecksUI();
 
             //mysql
             //多个数据库上下文可以使用池减少开销，略微增加性能
@@ -234,6 +246,23 @@ namespace EduTest
             app.UseCookiePolicy();
             app.UseAuthentication();
 
+            //HealthyChecks
+            app.UseHealthChecks("/health",
+                new HealthCheckOptions
+                {
+                    ResponseWriter = async (context, report) =>
+                    {
+                        var result = JsonConvert.SerializeObject(
+                            new
+                            {
+                                status = report.Status.ToString(),
+                                errors = report.Entries.Select(e => new { key = e.Key, value = Enum.GetName(typeof(HealthStatus), e.Value.Status) })
+                            });
+                        context.Response.ContentType = MediaTypeNames.Application.Json;
+                        await context.Response.WriteAsync(result);
+                    }
+                });
+            app.UseHealthChecksUI();//
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
