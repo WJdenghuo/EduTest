@@ -23,6 +23,12 @@
     </header>
     <main>
         <input type="text" placeholder="请输入用户名" id="userName"/><button id="start">加入</button>
+        <select id="bitrate">
+            <option value="128">128 k/b</option>
+            <option value="256">256 k/b</option>
+            <option value="512">512 k/b</option>
+        </select>
+        <strong id="realtimeBitRate">0</strong>
         <video id="local" width="300" height="300" autoplay></video>
         <video id="remote" width="300" height="300" autoplay></video>
     </main>
@@ -30,6 +36,7 @@
        
     </footer>
     <script>
+        //分支合并测试
         var server = "https://www.guoshuai.xyz/janus";
         //if (window.location.protocol === 'http:')
         //    server = "http://" + window.location.hostname + ":8088/janus";
@@ -89,7 +96,21 @@
                                             mediaState: function (medium, on) {
                                                 Janus.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
                                             },
-                                            webrtcState: function (on) {                                              
+                                            webrtcState: function (on) {
+                                                if (!on) {
+                                                    return;
+                                                }
+                                                $("#bitrate").on("change", function () {
+                                                    var id = $(this).val();
+                                                    var bitrate = parseInt(id) * 1000;
+                                                    if (bitrate === 0) {
+                                                        Janus.log("Not limiting bandwidth via REMB");
+                                                    } else {
+                                                        Janus.log("Capping bandwidth to " + bitrate + " via REMB");
+                                                    }
+                                                    sfutest.send({ "message": { "request": "configure", "bitrate": bitrate } });
+                                                    return false;
+                                                })
                                             },
                                             onmessage: function (msg, jsep) {
                                                 Janus.debug(" ::: Got a message (publisher) :::");
@@ -152,6 +173,13 @@
                                                 Janus.debug(stream);
                                                 
                                                 Janus.attachMediaStream($('#local').get(0), stream);
+                                                window.setInterval(function () {
+                                                    var bitrate = sfutest.getBitrate();
+                                                    //gets a verbose description of the currently received stream bitrate;
+                                                    //只能获取远端媒体流的码率，本地码率的采集率，通过其他方式获取
+                                                    $('#realtimeBitRate').text(bitrate);
+                                                    console.log(bitrate);
+                                                }, 1000)                        
                                             },
                                             onremotestream: function (stream) {
                                                 // The publisher stream is sendonly, we don't expect anything here
@@ -266,6 +294,10 @@
                         
                         Janus.attachMediaStream($('#remote').get(0), stream);
                         var videoTracks = stream.getVideoTracks();
+
+                        //window.setInterval(function () {
+
+                        //}, 1000)
                     },
                     oncleanup: function () {
                         

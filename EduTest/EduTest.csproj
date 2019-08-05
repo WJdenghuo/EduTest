@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <UserSecretsId>73245a73-b19a-4127-8a63-8005f4029aac</UserSecretsId>
     <TypeScriptToolsVersion>3.1</TypeScriptToolsVersion>  
   </PropertyGroup>
