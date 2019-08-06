@@ -36,6 +36,14 @@ namespace EduTest.Controllers
             }
             return View();
         }
+        public IActionResult RoomOnlySubscribeTest()
+        {
+            return View();
+        }
+        public IActionResult RoomLiveTest()
+        {
+            return View();
+        }
         public Boolean LogException(Exception e)
         {
             _logger.LogError(e,e.Message,nameof(JanusController));
