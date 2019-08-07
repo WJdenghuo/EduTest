@@ -50,7 +50,7 @@
         var sfutest = null;
         var opaqueId = "videoroomtest-" + 1;
 
-        var myroom = 1234;	// Demo room
+        var myroom = 123456;	// Demo room
         var myusername = null;
         var myid = null;
         var mystream = null;
@@ -87,7 +87,9 @@
                                                 sfutest = pluginHandle;
                                                 Janus.log("Plugin attached! (" + sfutest.getPlugin() + ", id=" + sfutest.getId() + ")");
                                                 Janus.log("  -- This is a publisher/manager"); 
-                                                registerUsername();
+                                                createRoom();
+                                                //registerUsername();
+                                                
                                             },
                                             error: function (error) {
                                                 Janus.error("  -- Error attaching plugin...", error);
@@ -116,6 +118,8 @@
                                                 })
                                             },
                                             onmessage: function (msg, jsep) {
+                                                //查看房间创建房间信息
+                                                updateRecsList();
                                                 Janus.debug(" ::: Got a message (publisher) :::");
                                                 Janus.debug(msg);
                                                 var event = msg["videoroom"];
@@ -127,11 +131,13 @@
                                                         mypvtid = msg["private_id"];
                                                         Janus.log("Successfully joined room " + msg["room"] + " with ID " + myid);
                                                         publishOwnFeed(true);
+                                                        
                                                         // Any new feed to attach to?
                                                         if (msg["publishers"] !== undefined && msg["publishers"] !== null) {
                                                             var list = msg["publishers"];
                                                             Janus.debug("Got a list of available publishers/feeds:");
                                                             Janus.debug(list);
+                                                            console.log("publishers" + JSON.stringify(msg));
                                                             for (var f in list) {
                                                                 var id = list[f]["id"];
                                                                 var display = list[f]["display"];
@@ -336,6 +342,30 @@
                         }
                     }
                 });
+        }
+        function createRoom() {
+
+            var body = { "request": "create", "rome": myroom, "description": "test", "record": true,"rec_dir":"test" };
+            sfutest.send({
+                "message": body,
+                success: function (result) {
+                    console.log("createroom" + JSON.stringify(result));
+                    var test = result["room"];
+                    console.log(test);
+                    var register = { "request": "join", "room": test, "ptype": "publisher", "display": myusername };
+                    sfutest.send({ "message": register });
+                }
+            })          
+        }
+        function updateRecsList() {
+
+            var body = { "request": "list" };
+            sfutest.send({
+                "message": body,
+                success: function (result) {
+                    console.log("record" + JSON.stringify(result));
+                }
+            })
         }
     </script>
 </body>

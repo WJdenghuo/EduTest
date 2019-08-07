@@ -3,7 +3,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>only subscribe</title>
+    <title>Janus WebRTC Server: Video Room Demo</title>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/6.0.3/adapter.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
@@ -28,9 +28,10 @@
         </select>
         <strong id="realtimeBitRate">0</strong>
         <video id="local" width="300" height="300" autoplay></video>
-        <video id="remote0" width="300" height="300" autoplay></video>
-        <video id="remote1" width="300" height="300" autoplay></video>
-        <video id="remote2" width="300" height="300" autoplay></video>
+        <div id="remoteList">
+
+        </div>
+        @*<video id="remote" width="300" height="300" autoplay></video>*@
     </main>
     <footer></footer>
     <script>
@@ -121,7 +122,7 @@
                                                         myid = msg["id"];
                                                         mypvtid = msg["private_id"];
                                                         Janus.log("Successfully joined room " + msg["room"] + " with ID " + myid);
-                                                        //publishOwnFeed(true);
+                                                        publishOwnFeed(true);
                                                         // Any new feed to attach to?
                                                         if (msg["publishers"] !== undefined && msg["publishers"] !== null) {
                                                             var list = msg["publishers"];
@@ -133,7 +134,7 @@
                                                                 var audio = list[f]["audio_codec"];
                                                                 var video = list[f]["video_codec"];
                                                                 Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
-                                                                newRemoteFeed(id, display, audio, video ,f);
+                                                                newRemoteFeed(id, display, audio, video);
                                                             }
                                                         }
                                                     } else if (event === "destroyed") {
@@ -154,7 +155,7 @@
                                                                 var audio = list[f]["audio_codec"];
                                                                 var video = list[f]["video_codec"];
                                                                 Janus.debug("  >> [" + id + "] " + display + " (audio: " + audio + ", video: " + video + ")");
-                                                                newRemoteFeed(id, display, audio, video,f);
+                                                                newRemoteFeed(id, display, audio, video);
                                                             }
                                                         }
                                                     }
@@ -201,8 +202,7 @@
                 }
             });
         })
-        function newRemoteFeed(id, display, audio, video, f) {
-            debugger;
+        function newRemoteFeed(id, display, audio, video) {
             // A new feed has been published, create a new plugin handle and attach to it as a subscriber
             var remoteFeed = null;
             janus.attach(
@@ -289,11 +289,12 @@
                         // The subscriber stream is recvonly, we don't expect anything here
                     },
                     onremotestream: function (stream) {
-                        window.stream = stream;
                         Janus.debug("Remote feed #" + remoteFeed.rfindex);
-                        var $remote = "remote" + f;
-                        console.log($remote);
-                        Janus.attachMediaStream($($remote), stream);
+                        if ($('#' + id).length == 0) {
+                            $('<video id="' + id + '" width="300" height="300" autoplay></video>').appendTo($("#remoteList"));
+                        }
+                        $remote = $('#' + id).get(0);
+                        Janus.attachMediaStream($remote, stream);
                         var videoTracks = stream.getVideoTracks();
 
                         //window.setInterval(function () {
@@ -319,7 +320,7 @@
                     success: function (jsep) {
                         Janus.debug("Got publisher SDP!");
                         Janus.debug(jsep);
-                        var publish = { "request": "configure", "audio": useAudio, "video": true };
+                        var publish = { "request": "configure", "audio": false, "video": false };
                         sfutest.send({ "message": publish, "jsep": jsep });
                     },
                     error: function (error) {
