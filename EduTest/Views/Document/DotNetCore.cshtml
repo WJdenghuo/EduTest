@@ -1,0 +1,103 @@
+﻿
+@{
+//Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>DotNetCore</title>
+</head>
+<body>
+    <h1>一、.net core 环境配置</h1>
+    <h2>①Register Microsoft key and feed</h2>
+    <ul>
+        <li>
+            wget -q https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+        </li>
+        <li>
+            sudo dpkg -i packages-microsoft-prod.deb
+        </li>
+    </ul>
+    <h2>②Install the .NET SDK</h2>
+    <ul>
+        <li>
+            sudo apt-get install apt-transport-https
+        </li>
+        <li>
+            sudo apt-get update
+        </li>
+        <li>
+            sudo apt-get install dotnet-sdk-2.2
+        </li>
+    </ul>
+    <h1>二、Mysql</h1>
+    <h2>①安装MySQL服务端、客户端、开发接口</h2>
+    <ul>
+        <li>sudo apt-get install mysql-server</li>
+        <li>sudo apt install mysql-client</li>
+        <li>sudo apt install libmysqlclient-dev</li>
+        <li>安装完毕后，通过下面的命令测试是否安装成功 sudo netstat -tap | grep mysql</li>
+    </ul>
+    <h2>②登录MySQL数据库</h2>
+    <ul>
+        <li>mysql - u root -p</li>
+        <li>输入安装时root设置的初始密码</li>
+    </ul>
+    <h2>③允许远程连接</h2>
+    <ul>
+        <li>vi /etc/mysql/mysqld.conf.d/mysqld.cnf  注释掉<strong>bind-address = 127.0.0.1</strong>(默认只允许本地访问)</li>
+        <li>
+            修改权限、立即生效
+            @Html.Raw("grant all on *.* to root@'%' identified by '数据库密码' with grant option;")            
+            flush privileges;
+        </li>
+        <li>quit退出命令行，重启mysql服务 service mysql restart</li>
+    </ul>
+    <h2>④使用远程连接工具管理mysql，推荐使用navicat for mysql（最新版全支持）</h2>
+    <h1>三、Redis</h1>
+    <h2>①安装redis服务端</h2>
+    <ul>
+        <li>sudo apt-get install redis-server</li>
+    </ul>
+    <h2>②检查（多种选择）</h2>
+    <ul>
+        <li>ps -aux|grep redis</li>
+        <li>netstat -nlt|grep 6379</li>
+        <li>sudo /etc/init.d/redis-server status</li>
+        <li>/etc/systemd/system 下有redis的守护进程 通过sudo systemctl status redis.server.service 也可以检查状态</li>
+    </ul>
+    <h2>③登录</h2>
+    <ul>
+        <li>使用redis-cli，相关命令参照官网</li>
+        <li>.net core 下具体使用 HomeCotroller/Index有相关示例</li>
+    </ul>
+    <h1>四、Nginx</h1>
+    <h2>①安装</h2>
+    <ul>
+        <li>sudo apt install nginx</li>
+    </ul>
+    <h2>②配置</h2>
+    <ul>
+        <li><a href="https://www.nginx.com/" target="_blank">官网</a></li>
+        <li><a href="http://www.nginx.cn/doc/" target="_blank">中文网</a></li>
+        <li><a href="https://nginxconfig.io/" target="">配置工具</a></li>
+    </ul>
+    <h2>③检查</h2>
+    <ul>
+        <li>nginx -t</li>
+        <li>nginx -s reload</li>
+    </ul>
+    <h1>五、.net core部署</h1>
+    <h2>①上传安装包</h2>
+    <ul>
+        <li>使用ftp工具上传至ubuntu服务器器</li>
+    </ul>
+    <h2>②添加守护进程（监视应用）</h2>
+    <ul>
+        <li><a href="https://docs.microsoft.com/zh-cn/aspnet/core/host-and-deploy/linux-nginx?view=aspnetcore-2.2" target="_blank">参照官方说明</a></li>
+    </ul>
+</body>
+</html>

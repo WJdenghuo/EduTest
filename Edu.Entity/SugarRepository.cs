@@ -35,7 +35,7 @@ namespace Edu.Entity
             return test.Delete(entity);
         }
 
-        public async void DeleteAsync(T entity)
+        public  void DeleteAsync(T entity)
         {
             throw new NotImplementedException();
         }
@@ -55,7 +55,7 @@ namespace Edu.Entity
             var test = new SimpleClient<T>(Db);
             return test.GetList(whereExpression);
         }
-        public async Task<T> GetByIdAsync(int id)
+        public  Task<T> GetByIdAsync(int id)
         {
             throw new NotImplementedException();
         }
@@ -66,7 +66,7 @@ namespace Edu.Entity
             return test.GetList();
         }
 
-        public async Task<IEnumerable<T>> ListAllAsync()
+        public  Task<IEnumerable<T>> ListAllAsync()
         {
             throw new NotImplementedException();
         }
@@ -77,7 +77,7 @@ namespace Edu.Entity
             return test.Update(entity);
         }
 
-        public async void UpdateAsync(T entity)
+        public  void UpdateAsync(T entity)
         {
             throw new NotImplementedException();
         }

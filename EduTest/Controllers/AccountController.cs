@@ -83,7 +83,7 @@ namespace EduTest.Controllers
         #region 用户登录
         // GET: Account
         [AllowAnonymous]
-        public async Task<IActionResult> Login()
+        public IActionResult Login()
         {
             //FormsAuthentication.SignOut();
             // Clear the existing external cookie to ensure a clean login process
