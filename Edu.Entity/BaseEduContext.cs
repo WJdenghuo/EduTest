@@ -22,7 +22,7 @@ namespace Edu.Entity.MySqlEntity
         public virtual DbSet<UserRole> UserRole { get; set; }
         public virtual DbSet<Log> Log { get; set; }
         public virtual DbSet<Meet> Meet { get; set; }
-
+        public virtual DbSet<Room> Room { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)

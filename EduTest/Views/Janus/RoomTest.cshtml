@@ -22,7 +22,7 @@
 
     </header>
     <main>
-        <input type="text" placeholder="请输入用户名" id="userName"/><button id="start">加入</button>
+        <input type="text" placeholder="请输入房间号" id="userName"/><button id="start">加入</button>
         <select id="bitrate">
             <option value="128">128 k/b</option>
             <option value="256">256 k/b</option>
@@ -50,7 +50,7 @@
         var sfutest = null;
         var opaqueId = "videoroomtest-" + 1;
 
-        var myroom = 123456;	// Demo room
+        var myroom = 12345678;	// Demo room
         var myusername = null;
         var myid = null;
         var mystream = null;
@@ -64,8 +64,8 @@
                 debug: "all", callback: function () {
                     // Use a button to start the demo
                     $('#start').one('click', function () {
+                        //myroom = $("#userName").val();
                         console.log("触发" + new Date());
-                        myusername = $("#userName").val();
                         $(this).attr('disabled', true).unbind('click');
                         // Make sure the browser supports WebRTC
                         if (!Janus.isWebrtcSupported()) {
@@ -87,8 +87,8 @@
                                                 sfutest = pluginHandle;
                                                 Janus.log("Plugin attached! (" + sfutest.getPlugin() + ", id=" + sfutest.getId() + ")");
                                                 Janus.log("  -- This is a publisher/manager"); 
-                                                createRoom();
-                                                //registerUsername();
+                                                //createRoom();
+                                                registerUsername();
                                                 
                                             },
                                             error: function (error) {
@@ -119,7 +119,7 @@
                                             },
                                             onmessage: function (msg, jsep) {
                                                 //查看房间创建房间信息
-                                                updateRecsList();
+                                                //updateRecsList();
                                                 Janus.debug(" ::: Got a message (publisher) :::");
                                                 Janus.debug(msg);
                                                 var event = msg["videoroom"];
@@ -344,19 +344,33 @@
                 });
         }
         function createRoom() {
-
-            var body = { "request": "create", "rome": myroom, "description": "test", "record": true,"rec_dir":"test" };
-            sfutest.send({
-                "message": body,
-                success: function (result) {
-                    console.log("createroom" + JSON.stringify(result));
-                    var test = result["room"];
-                    console.log(test);
-                    var register = { "request": "join", "room": test, "ptype": "publisher", "display": myusername };
+            $.post("/Janus/RoomExist", { roomID: myroom }, function (msg) {
+                console.log("msg:"+msg);
+                if (msg!="") {
+                    console.log("+1");
+                    var register = { "request": "join", "room": msg, "ptype": "publisher", "display": myusername };
                     sfutest.send({ "message": register });
                 }
-            })          
-        }
+                else {
+                    var body = { "request": "create", "rome": myroom, "description": "test", "record": true, "rec_dir": "test" };
+                    sfutest.send({
+                        "message": body,
+                        success: function (result) {
+                            
+                            console.log("createRoom" + JSON.stringify(result));
+                            var test = parseInt(result["room"]);
+                            console.log("room:"+test);
+                            debugger;
+                            $.post("/Janus/CreateRoom", { roomID: test, meetID: myroom}, function (msg) {
+                            })
+                            
+                            var register = { "request": "join", "room": test, "ptype": "publisher", "display": myusername };
+                            sfutest.send({ "message": register });
+                        }
+                    })          
+                }
+            })
+                    }
         function updateRecsList() {
 
             var body = { "request": "list" };

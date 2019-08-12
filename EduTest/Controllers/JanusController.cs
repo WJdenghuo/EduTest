@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Edu.Entity.MySqlEntity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -10,9 +11,11 @@ namespace EduTest.Controllers
     public class JanusController : Controller
     {
         private readonly ILogger _logger;
-        public JanusController(ILogger<JanusController> logger)
+        private readonly BaseEduContext _baseEduContext;
+        public JanusController(ILogger<JanusController> logger, BaseEduContext baseEduContext)
         {
             _logger = logger;
+            _baseEduContext = baseEduContext;
         }
         public IActionResult Index()
         {
@@ -35,6 +38,30 @@ namespace EduTest.Controllers
                 throw;
             }
             return View();
+        }
+        [HttpPost]
+        public IActionResult RoomExist(Int32 roomID)
+        {
+            var room = _baseEduContext.Room.SingleOrDefault(x => x.MeetID == roomID || x.Numeric == roomID);
+            if (room!=null)
+            {
+                return Content(room.Numeric.ToString());
+            }
+            return Content("");     
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateRoom(Int64 roomID,Int32 meetID)
+        {
+            Room room = new Room();
+            room.CreateDateTime = DateTime.Now;
+            room.Numeric = roomID;
+            room.MeetID = meetID;
+            await _baseEduContext.Room.AddAsync(room);
+            if (await _baseEduContext.SaveChangesAsync() > 0)
+            {
+                return Content("");
+            }
+            return Content("");
         }
         public IActionResult RoomOnlySubscribeTest()
         {
