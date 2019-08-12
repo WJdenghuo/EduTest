@@ -23,8 +23,8 @@
         <input type="text" placeholder="请输入房间号" id="userName" /><button id="start">加入</button>
         <select id="bitrate">
             <option value="128">128 k/b</option>
-            <option value="64">64 K/b</option>
-            <option value="32">32 k/b</option>
+            <option value="256">256 K/b</option>
+            <option value="512">512 k/b</option>
         </select>
         <strong id="realtimeBitRate">0</strong>
         <video id="local" width="300" height="300" autoplay></video>
@@ -47,7 +47,8 @@
         var opaqueId = "videoroomtest-" + 1;
 
         var myroom = 1234;	// Demo room
-        var myusername = null;
+        var uRoomeID = 0;
+        var myusername = "test";
         var myid = null;
         var mystream = null;
         // We use this other ID just to map our subscriptions to us
@@ -60,8 +61,8 @@
                 debug: "all", callback: function () {
                     // Use a button to start the demo
                     $('#start').one('click', function () {
+                        myroom = parseInt($("#userName").val());
                         console.log("触发" + new Date());
-                        myusername = $("#userName").val();
                         $(this).attr('disabled', true).unbind('click');
                         // Make sure the browser supports WebRTC
                         if (!Janus.isWebrtcSupported()) {
@@ -83,7 +84,9 @@
                                                 sfutest = pluginHandle;
                                                 Janus.log("Plugin attached! (" + sfutest.getPlugin() + ", id=" + sfutest.getId() + ")");
                                                 Janus.log("  -- This is a publisher/manager");
-                                                registerUsername();
+                                                createRoom();
+                                                //registerUsername();
+
                                             },
                                             error: function (error) {
                                                 Janus.error("  -- Error attaching plugin...", error);
@@ -112,6 +115,8 @@
                                                 })
                                             },
                                             onmessage: function (msg, jsep) {
+                                                //查看房间创建房间信息
+                                                updateRecsList();
                                                 Janus.debug(" ::: Got a message (publisher) :::");
                                                 Janus.debug(msg);
                                                 var event = msg["videoroom"];
@@ -123,11 +128,13 @@
                                                         mypvtid = msg["private_id"];
                                                         Janus.log("Successfully joined room " + msg["room"] + " with ID " + myid);
                                                         publishOwnFeed(true);
+
                                                         // Any new feed to attach to?
                                                         if (msg["publishers"] !== undefined && msg["publishers"] !== null) {
                                                             var list = msg["publishers"];
                                                             Janus.debug("Got a list of available publishers/feeds:");
                                                             Janus.debug(list);
+                                                            console.log("publishers" + JSON.stringify(msg));
                                                             for (var f in list) {
                                                                 var id = list[f]["id"];
                                                                 var display = list[f]["display"];
@@ -170,6 +177,7 @@
                                                 Janus.debug(" ::: Got a local stream :::");
                                                 mystream = stream;
                                                 Janus.debug(stream);
+                                                sfutest.send({ "message": { "request": "configure", "bitrate": 32*1000 } });
 
                                                 Janus.attachMediaStream($('#local').get(0), stream);
                                                 window.setInterval(function () {
@@ -215,7 +223,7 @@
                         Janus.log("Plugin attached! (" + remoteFeed.getPlugin() + ", id=" + remoteFeed.getId() + ")");
                         Janus.log("  -- This is a subscriber");
                         // We wait for the plugin to send us an offer
-                        var subscribe = { "request": "join", "room": myroom, "ptype": "subscriber", "feed": id, "private_id": mypvtid };
+                        var subscribe = { "request": "join", "room": uRoomeID, "ptype": "subscriber", "feed": id, "private_id": mypvtid };
                         // In case you don't want to receive audio, video or data, even if the
                         // publisher is sending them, set the 'offer_audio', 'offer_video' or
                         // 'offer_data' properties to false (they're true by default), e.g.:
@@ -272,7 +280,7 @@
                                     success: function (jsep) {
                                         Janus.debug("Got SDP!");
                                         Janus.debug(jsep);
-                                        var body = { "request": "start", "room": myroom };
+                                        var body = { "request": "start", "room": uRoomeID };
                                         remoteFeed.send({ "message": body, "jsep": jsep });
                                     },
                                     error: function (error) {
@@ -290,8 +298,8 @@
                     },
                     onremotestream: function (stream) {
                         Janus.debug("Remote feed #" + remoteFeed.rfindex);
-                        if ($('#' + id).length == 0) {
-                            $('<video id="' + id + '" width="300" height="300" autoplay></video>').appendTo($("#remoteList"));
+                        if ($('#'+id).length == 0) {
+                            $('<video id="'+id+'" width="300" height="300" autoplay></video>').appendTo($("#remoteList"));
                         }
                         $remote = $('#' + id).get(0);
                         Janus.attachMediaStream($remote, stream);
@@ -307,31 +315,21 @@
                 });
         }
         function registerUsername() {
-            if (myusername != "") {
-                myroom = myusername;
-            }
-            $.post("/Janus/RoomExist", { roomID: myroom }, function (msg) {
-                if (msg != "") {
-                    myroom = parseInt(msg);
-                    var register = { "request": "join", "room": myroom, "ptype": "publisher", "display": myusername };
-                    sfutest.send({ "message": register });
-                }
-                else {
-                    alert("该房间不存在！");
-                }
-            })
 
+            var register = { "request": "join", "room": myroom, "ptype": "publisher", "display": myusername };
+            debugger;
+            sfutest.send({ "message": register });
         }
         function publishOwnFeed(useAudio) {
 
             sfutest.createOffer(
                 {
                     // Add data:true here if you want to publish datachannels as well
-                    media: { audioRecv: false, videoRecv: false, audioSend: false, videoSend: false },	// Publishers are sendonly
+                    media: { audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true },	// Publishers are sendonly
                     success: function (jsep) {
                         Janus.debug("Got publisher SDP!");
                         Janus.debug(jsep);
-                        var publish = { "request": "configure", "audio": false, "video": false };
+                        var publish = { "request": "configure", "audio": useAudio, "video": true };
                         sfutest.send({ "message": publish, "jsep": jsep });
                     },
                     error: function (error) {
@@ -343,6 +341,47 @@
                         }
                     }
                 });
+        }
+        function createRoom() {
+            $.post("/Janus/RoomExist", { roomID: myroom }, function (msg) {
+                console.log("msg:"+msg);
+                if (msg!="") {
+                    console.log("+1");
+                    msg = parseInt(msg);
+                    uRoomeID = msg;
+                    var register = { "request": "join", "room": msg, "ptype": "publisher", "display": myusername };
+                    sfutest.send({ "message": register });
+                }
+                else {
+                    var body = { "request": "create", "rome": myroom, "description": "test", "publishers": 100};
+                    sfutest.send({
+                        "message": body,
+                        success: function (result) {
+
+                            console.log("createRoom" + JSON.stringify(result));
+                            var test = parseInt(result["room"]);
+                            uRoomeID = test;
+                            console.log("room:"+test);
+                            debugger;
+                            $.post("/Janus/CreateRoom", { roomID: test, meetID: myroom}, function (msg) {
+                            })
+
+                            var register = { "request": "join", "room": test, "ptype": "publisher", "display": myusername};
+                            sfutest.send({ "message": register });
+                        }
+                    })
+                }
+            })
+                    }
+        function updateRecsList() {
+
+            var body = { "request": "list" };
+            sfutest.send({
+                "message": body,
+                success: function (result) {
+                    console.log("record" + JSON.stringify(result));
+                }
+            })
         }
     </script>
 </body>

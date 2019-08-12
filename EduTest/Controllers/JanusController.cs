@@ -39,6 +39,10 @@ namespace EduTest.Controllers
             }
             return View();
         }
+        public IActionResult RoomNoRecorder()
+        {
+            return View();
+        }
         [HttpPost]
         public IActionResult RoomExist(Int32 roomID)
         {
