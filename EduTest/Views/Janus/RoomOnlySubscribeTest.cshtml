@@ -36,11 +36,12 @@
     <footer></footer>
     <script>
         //分支合并测试
-        var server = "https://www.guoshuai.xyz/janus";
-        //if (window.location.protocol === 'http:')
-        //    server = "http://" + window.location.hostname + ":8088/janus";
-        //else
-        //    server = "https://" + window.location.hostname + ":8089/janus";
+        //var server = "https://www.funny3.cn/janus";
+        var server = null;
+        if (window.location.protocol === 'http:')
+            server = "http://" + "www.funny3.cn" + ":8088/janus";
+        else
+            server = "https://" + "www.funny3.cn" + ":8089/janus";
 
         var janus = null;
         var sfutest = null;
