@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>EduTest</name>
+    </assembly>
+    <members>
+        <member name="M:EduTest.Areas.Admin.Controllers.UserInfoController.GetModyPwd(System.Int32)">
+            <summary>
+            修改密码
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:EduTest.Auth.ApiAuthorize">
+            <summary>
+            重写实现处理授权失败时返回json,避免跳转登录页
+            </summary>
+        </member>
+        <member name="T:EduTest.Controllers.API.JanusController">
+            <summary>
+            Janus
+            </summary>
+        </member>
+        <member name="M:EduTest.Controllers.API.JanusController.Test">
+            <summary>
+            janus 测试
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:EduTest.Controllers.API.TestController">
+            <summary>
+            测试xml注释文件(controller)
+            </summary>
+        </member>
+        <member name="M:EduTest.Controllers.API.TestController.TestAsync">
+             <summary>
+             测试xml注释文件(action)
+             </summary>
+             <remarks>
+             Sample request:
+            
+                 Get /Todo
+                 {
+                    "id": 1,
+                    "name": "Item1",
+                    "isComplete": true
+                 }
+            
+             </remarks>
+        </member>
+        <member name="M:EduTest.Controllers.IpRateLimitController.Post">
+            <summary>
+            可将规则存储在数据库中配置ip限制规则（动态）
+            </summary>
+        </member>
+    </members>
+</doc>
