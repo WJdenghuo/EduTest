@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
     <PackageReference Include="mySqlSugarCore" Version="3.5.4" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.2.0" />
-    <PackageReference Include="sqlSugarCore" Version="4.9.9.9" />
+    <PackageReference Include="sqlSugarCore" Version="5.0.0.9" />
   </ItemGroup>
 
   <ItemGroup>
