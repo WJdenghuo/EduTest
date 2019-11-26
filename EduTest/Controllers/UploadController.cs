@@ -23,7 +23,22 @@ namespace EduTest.Controllers
         {
             return View();
         }
-
+        public MemoryStream GetStream()
+        {
+            byte[] buffer = new byte[6500];
+            using (var memoryStream=new MemoryStream())
+            {
+                using (var streamInput = System.IO.File.Open("path", FileMode.Open, FileAccess.Read))
+                {
+                    var readCount = streamInput.Read(buffer, 0, buffer.Length);
+                    if (readCount > 0)
+                    {
+                        memoryStream.Write(buffer, 0, readCount);
+                    }
+                }
+                return memoryStream;
+            }
+        }
         public async Task<IActionResult> PostFiles(List<IFormFile> files)
         {
             //用户上传文件可能存在同名，使用guid和附件表做映射，不影响用户下载

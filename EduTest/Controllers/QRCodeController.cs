@@ -6,17 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EduTest.Controllers
 {
-    public class RTCMultiConnectionController : Controller
+    public class QRCodeController : Controller
     {
         public IActionResult Index()
-        {
-            return View();
-        }
-        public IActionResult ScreenShare()
-        {
-            return View();
-        }
-        public IActionResult SocketDotIO()
         {
             return View();
         }

@@ -130,6 +130,9 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         var parameters = '';
 
         parameters += '?userid=' + connection.userid;
+        parameters += '&AppID=' + connection.AppID;
+        parameters += '&UserName=' + connection.UserName;
+        parameters += '&StartDate=' + connection.StartDate;
         parameters += '&sessionid=' + connection.sessionid;
         parameters += '&msgEvent=' + connection.socketMessageEvent;
         parameters += '&socketCustomEvent=' + connection.socketCustomEvent;
@@ -178,7 +181,6 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         } catch (e) {
             connection.socket = io.connect(connection.socketURL + parameters, connection.socketOptions);
         }
-
         var mPeer = connection.multiPeersHandler;
 
         connection.socket.on('extra-data-updated', function(remoteUserId, extra) {
@@ -4673,7 +4675,9 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         } else {
             connection.closeBeforeUnload = false;
         }
-
+        connection.AppID = '';
+        connection.StartDate = '';
+        connection.UserName = '';
         connection.userid = getRandomString();
         connection.changeUserId = function(newUserId, callback) {
             callback = callback || function() {};

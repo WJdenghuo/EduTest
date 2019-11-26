@@ -75,7 +75,14 @@ namespace EduTest.Controllers.API
         {
             return Content("测试2");
         }
-
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult TokenTest(string token)
+        {
+            if (String.IsNullOrEmpty(token))
+                return Unauthorized();
+            return Ok();
+        }
         [AllowAnonymous]
         [HttpPost]
         [Route("GetToken")]

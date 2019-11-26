@@ -1,0 +1,39 @@
+﻿
+@*@{
+    Layout = null;
+}*@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+    <img />
+    <script>
+        var __awesome_qr_base_path = "js";
+        require([__awesome_qr_base_path + '/awesome-qr'], function (AwesomeQR) {
+            console.log(AwesomeQR)
+            var img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = () => {
+                AwesomeQR.create({
+                    text: 'Makito loves Kafuu Chino.',
+                    size: 200,
+                    margin: 20,
+                    backgroundImage: img,
+                    bindElement: 'qrcode',
+                    callback: function () {
+                        console.log('success')
+                    },
+                    colorDark: '#222',
+                    colorLight: '#abc',
+
+                });
+            };
+            img.src = "~/File/Dicussion/02b079a35e894f4693e46ad0dd312ad2.jpg";
+    </script>
+</body>
+</html>

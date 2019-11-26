@@ -650,6 +650,16 @@
         "package.json",
         "README.md"
       ]
+    },
+    {
+      "provider": "unpkg",
+      "library": "awesome-qr@1.2.0",
+      "destination": "wwwroot/lib/awesome-qr/"
+    },
+    {
+      "provider": "unpkg",
+      "library": "awesome-qr@1.2.0",
+      "destination": "wwwroot/lib/awesome-qr/"
     }
   ]
 }

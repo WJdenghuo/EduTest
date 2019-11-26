@@ -10,6 +10,7 @@
     <meta charset="utf-8">
     <title>Video Conferencing using RTCMultiConnection</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*" />
     <link rel="shortcut icon" href="~/demos/logo.png">
     <link rel="stylesheet" href="~/demos/stylesheet.css">
     <script src="~/demos/menu.js"></script>
@@ -62,6 +63,8 @@
             <button id="join-room">Join Room</button>
             <button id="open-or-join-room">Auto Open Or Join Room</button>
             <button id="screen">screen</button>
+            <button id="rate-128">rate-128</button>
+            <button id="rate-256">rate-256</button>
         </div>
 
         <div id="videos-container" style="margin: 20px 0;"></div>
@@ -79,6 +82,7 @@
     <script src="~/demos/js/getScreenId.js"></script>
     <script src="https://cdn.bootcss.com/RecordRTC/5.5.8/RecordRTC.js"></script>
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.webrtc-experiment.com/hark.js"></script>
     <script>
         // ......................................................
         // .......................UI Code........................
@@ -114,9 +118,10 @@
             });
         };
 
-        document.getElementById('open-or-join-room').onclick = function () {
+        document.getElementById('open-or-join-room').onclick = function () {            
             disableInputButtons();
             connection.openOrJoin(document.getElementById('room-id').value, function (isRoomExist, roomid, error) {
+                
                 if (error) {
                     disableInputButtons(true);
                     alert(error);
@@ -125,41 +130,367 @@
                     // if room doesn't exist, it means that current user will create the room
                     showRoomURL(roomid);
                 }
+                if (roomid) {
+                    console.log("roomid:" + roomid);
+                    isOnline();
+                    if (connection.socket) {
+                        console.log("socket可以发送信息");
+                    }
+                }
+                
             });
         };
+       
+        function isOnline() {
+            connection.send("....");
+            window.setInterval(function () {
+                connection.socket.emit('', '1');
+            }, 10000);
+            //if (connection.isOnline) {
 
+            //    connection.send("消息测试");
+            //}
+            //else {
+            //    var i = 1;
+            //    do {
+            //        if (connection.isOnline) {
+            //            window.setTimeout(function () {
+            //                connection.send("消息测试");
+            //            }, 300)
+            //            break;
+            //        }
+            //        else {
+            //            i++;
+            //        }
+            //    } while (i < 3);
+            //}
+        }
         // ......................................................
         // ..................RTCMultiConnection Code.............
         // ......................................................
 
+        // Older browsers might not implement mediaDevices at all, so we set an empty object first
+        if (navigator.mediaDevices === undefined) {
+            navigator.mediaDevices = {};
+        }
+
+        // Some browsers partially implement mediaDevices. We can't just assign an object
+        // with getUserMedia as it would overwrite existing properties.
+        // Here, we will just add the getUserMedia property if it's missing.
+        if (navigator.mediaDevices.getUserMedia === undefined) {
+            navigator.mediaDevices.getUserMedia = function (constraints) {
+
+                // First get ahold of the legacy getUserMedia, if present
+                var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+                // Some browsers just don't implement it - return a rejected promise with an error
+                // to keep a consistent interface
+                if (!getUserMedia) {
+                    return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+                }
+
+                // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+                return new Promise(function (resolve, reject) {
+                    getUserMedia.call(navigator, constraints, resolve, reject);
+                });
+            }
+        }
+        //jwt中间件鉴权
+        //var io = ioServer(httpApp);
+        //var socketioJwt = require('socketio-jwt');
+        //io.use(socketioJwt.authorize({
+        //    secret: 'your secret or public key',
+        //    handshake: true
+        //}));
+
+        ////自定义中间件从参数中获取校验信息，再去其他服务校验
+        //var io = ioServer(httpApp);
+        //// middleware
+        //io.use((socket, next) => {
+        //    let token = socket.handshake.query.token;
+        //    if (token) {
+        //        return next();
+        //    }
+        //    return next(new Error('authentication error'));
+        //});
+
+        ////node内部post方法（用于携带校验信息去各自的服务校验）
+        //var request = require('request');
+        //var url = "地址";
+        //var requestData = "上送的数据";
+
+        //httprequest(url, requestData);
+
+        //function httprequest(url, data) {
+        //    request({
+        //        url: url,
+        //        method: "POST",
+        //        json: true,
+        //        headers: {
+        //            "content-type": "application/json",
+        //        },
+        //        body: data
+        //    }, function (error, response, body) {
+        //        if (!error && response.statusCode == 200) {
+        //            console.log(body) // 请求成功的处理逻辑
+        //            return true;
+        //        }
+        //        return false;
+        //    });
+        //};
+        //function TokenTest(url,token) {
+        //    var querystring = require('querystring');
+
+        //    var post_data = {
+        //        "AppID": '1',
+        //        "StartDate": '2019-10-10',
+        //        "UserName": "gs"
+        //    };//这是需要提交的数据  
+
+
+        //    var content = querystring.stringify(post_data);
+
+        //    var options = {
+        //        hostname: 'janus.guoshuai.xyz',
+        //        path: '/api/values/tokenTest',
+        //        method: 'POST',
+        //        headers: {
+        //            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        //        }
+        //    };
+
+        //    httpServer.request(options, function (error, response, body) {
+        //        if (!error && response.statusCode == 200) {
+        //            console.log(body) // 请求成功的处理逻辑
+        //            return true;
+        //        }
+        //        return false;
+        //    });
+        //}
+        //var request = require('request');
+
+        ////给媒体流添加监听事件
+        //addStreamStopListenerUsingPromises(stream)
+        //    .then(function () {
+        //        alert('screen sharing is ended.');
+        //    }
+        //    .error(function (e) { })
+        //    );
+     
+        function addStreamStopListener(stream, callback) {
+            stream.addEventListener('ended', function () {
+                callback();
+                callback = function () { };
+            }, false);
+            stream.addEventListener('inactive', function () {
+                callback();
+                callback = function () { };
+            }, false);
+            stream.getTracks().forEach(function (track) {
+                track.addEventListener('ended', function () {
+                    callback();
+                    callback = function () { };
+                }, false);
+                track.addEventListener('inactive', function () {
+                    callback();
+                    callback = function () { };
+                }, false);
+            });
+        }
+        function requestToken() {
+            request.post({
+                url: 'http://janus.guoshuai.xyz/api/values/tokenTest', form: {
+                    "AppID": '1',
+                    "StartDate": '2019-10-10',
+                    "UserName": "gs"
+                }
+            }, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    return true;
+                }
+                console.log(error, response, body)
+                return false;
+            })
+        }       
         var connection = new RTCMultiConnection();
 
         // by default, socket.io server is assumed to be deployed on your own URL
-        connection.socketURL = 'https://janus.guoshuai.xyz/';
+        connection.socketURL = 'https://janus.guoshuai.xyz/'; //https://janus.guoshuai.xyz/ ,https://rtc.cnki.net/
 
         // comment-out below line if you do not have your own socket.io server
         // connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 
-        connection.socketMessageEvent = 'video-conference-demo';
-
+        connection.socketMessageEvent = 'video-conference-demo-cnki';
+        
         connection.session = {
             audio: true,
-            video: true
+            video: true,
+            data: true
         };
-        connection.bandwidth = {
-            audio: 50,  // 50 kbps
-            video: 256, // 256 kbps
-            screen: 300 // 300 kbps
+        connection.codecs.video = 'VP8';
+        connection.bandwidth = { // all values in kbits/per/seconds
+            audio: 128,
+            video: 256,
+            screen: 512
         };
-        //connection.mediaConstraints = {
+
+        connection.AppID = 'asds';
+        connection.StartDate = '2019-10-10';
+        connection.UserName = 'gs';
+
+        //connection.maxParticipantsAllowed = 1;
+        //connection.mediaConstraints.video.optional = [];
+        //connection.mediaConstraints.video.optional.push({
+        //    sourceId: yourNewCameraId
+        //});
+        //connection.mediaConstraints.video.optional.push({
+        //    bandwidth: connection.bandwidth.video * 8 * 1024 || 128 * 8 * 1024
+        //});
+        //针对没有摄像头的用户
+        //navigator.getUserMedia({
         //    video: true,
         //    audio: true
-        //};
+        //}, function (stream) {
+        //    connection.mediaConstraints = stream;
+        //}, function (error) {
+        //    connection.mediaConstraints = {
+        //        screen: true,
+        //        audio: true,
+        //        oneway: true
+        //    };
+        //    connection.session = {
+        //        audio: true,
+        //        screen: true
+        //    };
+        //});
+
+        connection.mediaConstraints = {
+            video: {
+                width: {
+                    ideal: 160
+                },
+                height: {
+                    ideal: 90
+                },
+                frameRate: 30,
+                deviceId: 'e958a8ce96df57ae391c18f5399fd5de79ba05c2c23ab7a3d4393340f1e0d6e7'
+            },
+            audio: false
+        };
         connection.sdpConstraints.mandatory = {
             OfferToReceiveAudio: true,
             OfferToReceiveVideo: true
         };
-        
+        //rate
+        //screen-capture-recorder  202584926be32da7909b8d9c04d3b850628db450a3bd7a6d88c5c59928eec464
+        //var myPreferredCameraDeviceId = '7ee2aed02000fb4ea34a8e73d2a40476a739d9964998e7c88bb6e8f92ca03d80';
+        //var bitrates = 512;
+        //var resolutions = 'Ultra-HD';
+        //var videoConstraints = {};
+
+        //if (resolutions == 'HD') {
+        //    videoConstraints = {
+        //        width: {
+        //            ideal: 1280
+        //        },
+        //        height: {
+        //            ideal: 720
+        //        },
+        //        frameRate: 30,
+        //        deviceId: myPreferredCameraDeviceId
+        //    };
+        //}
+
+        //if (resolutions == 'Ultra-HD') {
+        //    videoConstraints = {
+        //        width: {
+        //            ideal: 1920
+        //        },
+        //        height: {
+        //            ideal: 1080
+        //        },
+        //        frameRate: 30,
+        //        deviceId: myPreferredCameraDeviceId
+        //    };
+        //}
+
+        //connection.mediaConstraints = {
+        //    video: videoConstraints,
+        //    audio: true
+        //};
+
+        //var CodecsHandler = connection.CodecsHandler;
+
+        //connection.processSdp = function (sdp) {
+        //    var codecs = 'vp8';
+
+        //    if (codecs.length) {
+        //        sdp = CodecsHandler.preferCodec(sdp, codecs.toLowerCase());
+        //    }
+
+        //    if (resolutions == 'HD') {
+        //        sdp = CodecsHandler.setApplicationSpecificBandwidth(sdp, {
+        //            audio: 128,
+        //            video: bitrates,
+        //            screen: bitrates
+        //        });
+
+        //        sdp = CodecsHandler.setVideoBitrates(sdp, {
+        //            min: bitrates * 8 * 1024,
+        //            max: bitrates * 8 * 1024,
+        //        });
+        //    }
+
+        //    if (resolutions == 'Ultra-HD') {
+        //        sdp = CodecsHandler.setApplicationSpecificBandwidth(sdp, {
+        //            audio: 128,
+        //            video: bitrates,
+        //            screen: bitrates
+        //        });
+
+        //        sdp = CodecsHandler.setVideoBitrates(sdp, {
+        //            min: bitrates * 8 * 1024,
+        //            max: bitrates * 8 * 1024,
+        //        });
+        //    }
+
+        //    return sdp;
+        //};
+        $("#rate-128").on("click", function () {
+            
+            connection.processSdp = function (sdp) {
+                
+                sdp = CodecsHandler.setApplicationSpecificBandwidth(sdp, {
+                    audio: 128,
+                    video: 128,
+                    screen: 128
+                });
+
+                sdp = CodecsHandler.setVideoBitrates(sdp, {
+                    min: 128  * 1024,
+                    max: 128  * 1024,
+                });
+                console.log("rate-128-nochange" + sdp);
+                return sdp;
+            }
+        })
+        $("#rate-256").on("click", function () {
+            connection.processSdp = function (sdp) {
+                
+                sdp = CodecsHandler.setApplicationSpecificBandwidth(sdp, {
+                    audio: 256,
+                    video: 256,
+                    screen: 256
+                });
+
+                sdp = CodecsHandler.setVideoBitrates(sdp, {
+                    min: 256 * 8 * 1024,
+                    max: 256 * 8 * 1024,
+                });
+                console.log("rate-256-nochange" + sdp);
+                return sdp;
+            }
+        })
         var screenState = false;
         var streamid = 0, userid='';
         //screen
@@ -167,45 +498,77 @@
             if (!screenState) {
                 connection.attachStreams.forEach(function (localStream) {
                     localStream.stop();
+                    window.setTimeout(function () {
+                       
+                        connection.resetScreen();
+                        connection.addStream({
+                            screen: true,
+                            oneway: true
+                        });
+                    },300)
                 });
-                connection.mediaConstraints.video = true;
+                //connection.mediaConstraints.video = true;
                 //navigator.mediaDevices.getDisplayMedia({
                 //    video: true
                 //}).then(externalStream =>
                 //{
-                //    connection.addStream(externalStream);
+                //    //connection.addStream(externalStream);
                 //    window.stream = externalStream;
+                //    var video = document.createElement('video');
+                //    video.src = URL.createObjectURL(externalStream);
+                //    //video.muted = true;
+                //    var streamEvent = {
+                //        type: 'local',
+                //        stream: externalStream,
+                //        streamid: externalStream.id,
+                //        mediaElement: video
+                //    };
+                //    connection.onstream(streamEvent);
                 //}, 
                 //    error => {
                 //    alert(error);
                 //});
-                connection.addStream({
-                    screen: true,
-                    oneway: true
-                });
+                
             }
             else {
                 connection.attachStreams.forEach(function (localStream) {
                     localStream.stop();
+                    window.setTimeout(function () {
+                        connection.addStream({
+                            video: true
+                        });
+                    }, 300);
                 });
-                connection.mediaConstraints.video = true;
+                //connection.mediaConstraints.video = true;
                 //navigator.mediaDevices.getUserMedia({ video: true },
                 //    stream =>
                 //    {
-                //        connection.addStream(stream); 
-                //        window.stream = externalStream;
+                //        var video = document.createElement('video');
+                //        video.src = URL.createObjectURL(stream);
+                //        //video.muted = true;
+                //        var streamEvent = {
+                //            type: 'local',
+                //            stream: stream,
+                //            streamid: stream.id,
+                //            mediaElement: video
+                //        };
+                //        connection.onstream(streamEvent);
                 //    },
                 //    error => { console.log(error); }
                 //)
-                connection.addStream({
-                    video: true
-                });
+               
             }
             screenState = !screenState;
             //connection.onstream(window.stream);
         })
         connection.videosContainer = document.getElementById('videos-container');
         connection.onstream = function (event) {
+            initHark({
+                stream: event.stream,
+                streamedObject: event,
+                connection: connection
+            });
+            debugger;
             console.log(event.streamid);
             streamid = event.streamid;
             userid = event.userid;
@@ -238,11 +601,14 @@
                 }
             }
             video.srcObject = event.stream;
-
+            //addStreamStopListener(video.srcObject, function () {
+            //    alert('screen sharing is ended.');
+            //});
+           
             var width = parseInt(connection.videosContainer.clientWidth / 3) - 20;
             var mediaElement = getHTMLMediaElement(video, {
                 title: event.userid,
-                buttons: ['full-screen'],
+                //buttons: ['full-screen'],
                 width: width,
                 showOnMouseEnter: false
             });
@@ -291,6 +657,7 @@
                     }
                 });
             }
+           
         };
 
         var recordingStatus = document.getElementById('recording-status');
@@ -332,6 +699,89 @@
                 connection.join(connection.sessionid);
             }
         };
+        connection.onopen = function (event) {
+            connection.send('hello everyone');
+        };
+        connection.onmessage = function (event) {
+            
+            console.log("data"+event.data);
+            console.log("extra"+event.extra);
+        };
+        connection.onRoomFull = function (roomid) {
+            console.log("roomid:" + roomid);
+        };
+        connection.beforeAddingStream = function (stream, peer) {
+            return stream;
+        };
+        //connection.onReConnecting = function (event) {
+        //    console.info('ReConnecting with', event.userid, '...');
+        //};
+        //connection.onUserStatusChanged = function (event) {
+        //    var isOnline = event.status === 'online';
+        //    var isOffline = event.status === 'offline';
+
+        //    var targetUserId = event.userid;
+        //    var targetUserExtraInfo = event.extra; // extra.fullName/etc
+        //    console.warn(targetUserId + "status:" + event.status)
+        //};
+        //connection.onPeerStateChanged = function (state) {
+        //    if (state.iceConnectionState.search(/closed|failed/gi) !== -1) {
+        //        console.error('Peer connection is closed between you & ', state.userid, state.extra, 'state:', state.iceConnectionState);
+        //    }
+        //};
+        
+
+        connection.onspeaking = function (e) {
+            // e.streamid, e.userid, e.stream, etc.
+            e.mediaElement.style.border = '1px solid red';
+            console.warn("opspeaking");
+        };
+
+        connection.onsilence = function (e) {
+            // e.streamid, e.userid, e.stream, etc.
+            e.mediaElement.style.border = '';
+            console.warn("onsilence");
+        };
+
+        connection.onvolumechange = function (event) {
+            event.mediaElement.style.borderWidth = event.volume;
+            console.warn("onvolumechange");
+        };
+
+        function initHark(args) {
+            if (!window.hark) {
+                throw 'Please link hark.js';
+                return;
+            }
+            debugger;
+            var connection = args.connection;
+            var streamedObject = args.streamedObject;
+            var stream = args.stream;
+
+            var options = {};
+            var speechEvents = hark(stream, options);
+
+            speechEvents.on('speaking', function () {
+                debugger;
+                connection.onspeaking(streamedObject);
+            });
+
+            speechEvents.on('stopped_speaking', function () {
+                debugger;
+                connection.onsilence(streamedObject);
+            });
+
+            speechEvents.on('volume_change', function (volume, threshold) {
+                debugger;
+                streamedObject.volume = volume;
+                streamedObject.threshold = threshold;
+                connection.onvolumechange(streamedObject);
+            });
+        }
+        //connection.beforeRemovingStream = function (stream) {
+        //    debugger;
+        //    return stream;
+        //};
 
         // ..................................
         // ALL below scripts are redundant!!!
