@@ -94,11 +94,11 @@ namespace EduTest
             });
             //HealthyChecks
             //具体信息参照源码 https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks
-            services.AddHealthChecks()
-                .AddMySql(Configuration.GetConnectionString("DefaultConnection"))
-                .AddRedis(Configuration.GetConnectionString("RedisConnection")
-            );
-            services.AddHealthChecksUI();
+            //services.AddHealthChecks()
+            //    .AddMySql(Configuration.GetConnectionString("DefaultConnection"))
+            //    .AddRedis(Configuration.GetConnectionString("RedisConnection")
+            //);
+            //services.AddHealthChecksUI();
 
             //mysql
             //多个数据库上下文可以使用池减少开销，略微增加性能
@@ -260,22 +260,22 @@ namespace EduTest
             app.UseAuthentication();
 
             //HealthyChecks
-            app.UseHealthChecks("/health",
-                new HealthCheckOptions
-                {
-                    ResponseWriter = async (context, report) =>
-                    {
-                        var result = JsonConvert.SerializeObject(
-                            new
-                            {
-                                status = report.Status.ToString(),
-                                errors = report.Entries.Select(e => new { key = e.Key, value = Enum.GetName(typeof(HealthStatus), e.Value.Status) })
-                            });
-                        context.Response.ContentType = MediaTypeNames.Application.Json;
-                        await context.Response.WriteAsync(result);
-                    }
-                });
-            app.UseHealthChecksUI();//
+            //app.UseHealthChecks("/health",
+            //    new HealthCheckOptions
+            //    {
+            //        ResponseWriter = async (context, report) =>
+            //        {
+            //            var result = JsonConvert.SerializeObject(
+            //                new
+            //                {
+            //                    status = report.Status.ToString(),
+            //                    errors = report.Entries.Select(e => new { key = e.Key, value = Enum.GetName(typeof(HealthStatus), e.Value.Status) })
+            //                });
+            //            context.Response.ContentType = MediaTypeNames.Application.Json;
+            //            await context.Response.WriteAsync(result);
+            //        }
+            //    });
+            //app.UseHealthChecksUI();//
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 

@@ -45,7 +45,7 @@
     <script>
         //分支合并测试
         //var server = "https://www.funny3.cn/janus";
-        var server = "janus.guoshuai.xyz";
+        var server = "janus.guoshuzi.xyz";
         if (window.location.protocol === 'http:')
             server = "http://" + server + ":8088/janus";
         else
@@ -114,7 +114,7 @@
                                                 }
                                                 $("#bitrate").on("change", function () {
                                                     var id = $(this).val();
-                                                    var bitrate = parseInt(id) * 1000;
+                                                    var bitrate = parseInt(id) * 1024;
                                                     if (bitrate === 0) {
                                                         Janus.log("Not limiting bandwidth via REMB");
                                                     } else {
@@ -202,12 +202,13 @@
                                                 $('#channel').val("通道已成功建立！")
                                                 alert("通道已建立");
                                             },
-                                            ondata: function (data) {                                               
+                                            ondata: function (data) {
+                                                debugger;
                                                 Janus.debug("We got data from the DataChannel! " + data);
                                                 //~ $('#datarecv').val(data);
+                                                debugger;
                                                 var json = JSON.parse(data);
-                                                console.log(json);
-                                                $('#channel').val(json.text);
+                                                $('#channel').val(json["text"]);
                                             },
                                             onremotestream: function (stream) {
                                                 // The publisher stream is sendonly, we don't expect anything here
@@ -297,7 +298,7 @@
                                     jsep: jsep,
                                     // Add data:true here if you want to subscribe to datachannels as well
                                     // (obviously only works if the publisher offered them in the first place)
-                                    media: { audioSend: false, videoSend: false },	// We want recvonly audio/video
+                                    media: { audioSend: false, videoSend: false, data: true },	// We want recvonly audio/video
                                     success: function (jsep) {
                                         Janus.debug("Got SDP!");
                                         Janus.debug(jsep);
@@ -310,6 +311,17 @@
                                     }
                                 });
                         }
+                    },
+                    ondataopen: function (data) {
+                        Janus.log("The DataChannel is available!");
+                        $('#channel').val("remote通道已成功建立！")
+                        //alert("通道已建立");
+                    },
+                    ondata: function (data) {
+                        Janus.debug("We got data from the remote DataChannel! " + data);
+                        //~ $('#datarecv').val(data);
+                        var json = JSON.parse(data);
+                        $('#channel').val(json["text"]);
                     },
                     webrtcState: function (on) {
                         Janus.log("Janus says this WebRTC PeerConnection (feed #" + remoteFeed.rfindex + ") is " + (on ? "up" : "down") + " now");
@@ -364,7 +376,7 @@
                 });
         }
         function createRoom() {
-            $.post("/Janus/RoomExist", { roomID: myroom }, function (msg) {
+            $.post("/Janus/RoomExist?roomID=" + myroom, function (msg) {
                 console.log("msg:" + msg);
                 if (msg != "") {
                     console.log("+1");
@@ -374,7 +386,7 @@
                     sfutest.send({ "message": register });
                 }
                 else {
-                    var body = { "request": "create", "rome": myroom, "description": "test", "record": true, "rec_dir": "test", "publishers": 100 };
+                    var body = { "request": "create", "rome": myroom, "description": "test", "record": true, "rec_dir": "test", "publishers": 100,"bitrate":1024*1024 };
                     sfutest.send({
                         "message": body,
                         success: function (result) {
@@ -383,7 +395,7 @@
                             var test = parseInt(result["room"]);
                             uRoomeID = test;
                             console.log("room:" + test);
-                            $.post("/Janus/CreateRoom", { roomID: test, meetID: myroom }, function (msg) {
+                            $.post("/Janus/CreateRoom?roomID=" + test + "&meetID=" + myroom, function (msg) {
                             })
 
                             var register = { "request": "join", "room": test, "ptype": "publisher", "display": myusername };
@@ -462,23 +474,63 @@
 
         //该方法有待商榷
         function screenShare() {
-            navigator.mediaDevices.getDisplayMedia().then(function (stream) {
-                sfutest.createOffer(
-                    {
-                        stream: stream,
-                        success: function(jsep) {
-                            Janus.debug("Got publisher SDP!");
-                            Janus.debug(jsep);
-                            var publish = { "request": "configure", "audio": true, "video": true };
-                            sfutest.send({ "message": publish, "jsep": jsep });
-                        },
-                        error: function (error) {
-                            Janus.error("WebRTC error:", error);
-                            bootbox.alert("WebRTC error... " + JSON.stringify(error));
-                        }
-                    });
-            });
-            
+            ////navigator.mediaDevices.getDisplayMedia().then(function (stream) {
+            ////    sfutest.createOffer(
+            ////        {
+            ////            stream: stream,
+            ////            success: function(jsep) {
+            ////                Janus.debug("Got publisher SDP!");
+            ////                Janus.debug(jsep);
+            ////                var publish = { "request": "configure", "audio": true, "video": true };
+            ////                sfutest.send({ "message": publish, "jsep": jsep });
+            ////            },
+            ////            error: function (error) {
+            ////                Janus.error("WebRTC error:", error);
+            ////                bootbox.alert("WebRTC error... " + JSON.stringify(error));
+            ////            }
+            ////        });
+            ////});
+
+            //var unpublish = { "request": "unpublish" };
+            //sfutest.send({ "message": unpublish });
+            //window.setTimeout(function () {
+            //    sfutest.createOffer(
+            //        {
+            //            // Add data:true here if you want to publish datachannels as well
+            //            media: { video: "screen", audio: true, audioRecv: false, videoRecv: false, audioSend: true, videoSend: true, data: true },	// Publishers are sendonly
+            //            success: function (jsep) {
+            //                Janus.debug("Got publisher SDP!");
+            //                Janus.debug(jsep);
+            //                var publish = { "request": "configure", "audio": true, "video": true, "data": true };
+            //                sfutest.send({ "message": publish, "jsep": jsep });
+            //            },
+            //            error: function (error) {
+            //                Janus.error("WebRTC error:", error);
+            //                if (useAudio) {
+            //                    publishOwnFeed(false);
+            //                } else {
+
+            //                }
+            //            }
+            //        });
+            //}, 1000)      
+
+            sfutest.createOffer(
+                {
+                    media: {
+                        video: "screen",
+                        captureDesktopAudio:true,
+                        replaceVideo: true,
+                        replaceAudeo: true
+                    },
+                    success: function (jsep) {
+                        Janus.debug(jsep);
+                        sfutest.send({ message: { audio: true, video: true, data: true }, "jsep": jsep });
+                    },
+                    error: function (error) {
+                        bootbox.alert("WebRTC error... " + JSON.stringify(error));
+                    }
+                });
         }
         function sendData() {
             var data = $('#data').val();
@@ -525,6 +577,18 @@
         $('#mute').click(function () { toggleMute() });
         $('#unPublish').click(function () { unpublishOwnFeed() });
         $('#publish').click(function () { publishOwnFeed(true); });
+
+        //检测到网络发生变化时，重新进行ICE协商
+        function netChange() {
+            sfutest.createOffer({
+                iceRestart: true,
+                media: { data: true },
+                success: function (jsep) {
+                    echotest.send({ message: { audio: true, video: true }, jsep: jsep });
+                }
+            });
+        }
+        
     </script>
 </body>
 </html>
