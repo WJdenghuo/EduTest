@@ -2204,12 +2204,13 @@ function Janus(gatewayCallbacks) {
 						navigator.mediaDevices.getDisplayMedia({ video: true, audio: media.captureDesktopAudio })
 							.then(function(stream) {
 								pluginHandle.consentDialog(false);
-								if(isAudioSendEnabled(media) && !media.keepAudio) {
-									navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+								if (isAudioSendEnabled(media) && !media.keepAudio) {
+									navigator.mediaDevices.getUserMedia({ audio: true, video: true })
 									.then(function (audioStream) {
 										stream.addTrack(audioStream.getAudioTracks()[0]);
-										streamsDone(handleId, jsep, media, callbacks, stream);
-									})
+										//stream.addTrack(audioStream.getVideoTracks()[0]);
+                                            streamsDone(handleId, jsep, media, callbacks, stream);
+                                        }, error => { streamsDone(handleId, jsep, media, callbacks, stream) })
 								} else {
 									streamsDone(handleId, jsep, media, callbacks, stream);
 								}
