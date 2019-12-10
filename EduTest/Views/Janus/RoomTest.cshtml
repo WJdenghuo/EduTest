@@ -79,7 +79,8 @@
         var mystream = null;
         // We use this other ID just to map our subscriptions to us
         var mypvtid = null;
-
+        var first = false;
+        var hasTrack = false;
         var feeds = [];
         var bitrateTimer = [];
         $(function () {
@@ -126,12 +127,14 @@
                                                 Janus.debug("Consent dialog should be " + (on ? "on" : "off") + " now");
                                             },
                                             mediaState: function (medium, on) {
+
                                                 Janus.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
                                             },
                                             webrtcState: function (on) {
                                                 if (!on) {
                                                     return;
                                                 }
+                                                removeSream();
                                                 $("#bitrate").on("change", function () {
                                                     var id = $(this).val();
                                                     var bitrate = parseInt(id) * 1024;
@@ -204,23 +207,21 @@
                                                 }
                                             },
                                             onlocalstream: function (stream) {
+                                                
                                                 Janus.debug(" ::: Got a local stream :::");
                                                 mystream = stream;
                                                 Janus.debug(stream);
-
+                                                //非主持人/未经主持人允许 隐藏本地采集，
+                                                //主持人允许触发采集，并在本方法内允许展现本地媒体
+                                                if (!first) {
+                                                    return false;
+                                                }
                                                 Janus.attachMediaStream($('#local').get(0), stream);
-                                                window.setInterval(function () {
-                                                    var bitrate = sfutest.getBitrate();
-                                                    //gets a verbose description of the currently received stream bitrate;
-                                                    //只能获取远端媒体流的码率，本地码率的采集率，通过其他方式获取
-                                                    $('#realtimeBitRate').text(bitrate);
-                                                    console.log(bitrate);
-                                                }, 1000)
                                             },
                                             ondataopen: function (data) {
                                                 Janus.log("The DataChannel is available!");
                                                 $('#channel').val("通道已成功建立！")
-                                                alert("通道已建立");
+                                                //alert("通道已建立");
                                             },
                                             ondata: function (data) {
                                                 
@@ -358,13 +359,13 @@
                             $('<video id="' + id + '" width="300" height="300" autoplay></video>').appendTo($("#remoteList"));
                         }
                         $remote = $('#' + id).get(0);
-                        //stream.oninactive = function (event) {
-                        //    console.log('移除远端流后正常响应！');
-                        //    $('#' + id).remove();
-                        //    console.log('该远端用户id为：'+id+'已，video标签正常移除')
-                        //    return false;
-                        //};
-                        //console.log('移除远端流后异常响应')
+                        stream.oninactive = function (event) {
+                            console.log('移除远端流后正常响应！');
+                            $('#' + id).remove();
+                            console.log('该远端用户id为：'+id+'已，video标签正常移除')
+                            return false;
+                        };
+                        console.log('移除远端流后异常响应')
                         Janus.attachMediaStream($remote, stream);
                         var videoTracks = stream.getVideoTracks();
                         console.log(videoTracks.length);
@@ -388,28 +389,19 @@
             sfutest.createOffer(
                 {
                     // Add data:true here if you want to publish datachannels as well
-                    media: { audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: useAudio, data:true },	// Publishers are sendonly
+                    media: { audioRecv: false, videoRecv: false, audioSend: true, videoSend: true, video: true, audio: true, data: true },	// Publishers are sendonly
                     success: function (jsep) {
                         Janus.debug("Got publisher SDP!");
-                        Janus.debug(jsep);
-                        //sdp = jsep.sdp;
-                        //debugger;
-                        //var bandwidth = {
-                        //    screen: 300, // 300kbits minimum
-                        //    audio: 50, // 50kbits  minimum
-                        //    video: 256 // 256kbits (both min-max)
-                        //};
-                        //var isScreenSharing = false;
-                        ////sdp = BandwidthHandler.setApplicationSpecificBandwidth(sdp, bandwidth, isScreenSharing);
-                        //sdp = BandwidthHandler.setVideoBitrates(sdp, {
-                        //    min: bandwidth.video,
-                        //    max: bandwidth.video
-                        //});
-                        //jsep.sdp = sdp;
-                        //sfutest.webrtcStuff.mySdp = sdp;
-                        //sfutest.webrtcStuff.pc.setLocalDescription(jsep);
-                        ////sdp = BandwidthHandler.setOpusAttributes(sdp);
-                        var publish = { "request": "configure", "audio": useAudio, "video": true ,"data": true};
+                        //Janus.debug(jsep);
+                        //if (!useAudio) {
+                        //    sfutest.muteAudio();
+                        //    sfutest.muteVideo();
+                        //}
+                        //else {
+                        //     sfutest.unmuteAudio();
+                        //    sfutest.unmuteVideo();
+                        //}
+                        var publish = { "request": "configure", "audio": true, "video": true ,"data": true};
                         sfutest.send({ "message": publish, "jsep": jsep });
                     },
                     error: function (error) {
@@ -433,7 +425,7 @@
                     sfutest.send({ "message": register });
                 }
                 else {
-                    var body = { "request": "create", "rome": myroom, "description": "test", "record": true, "rec_dir": "test", "publishers": 100,"audiocodec":"opus","videocodec":"vp9","bitrates":2*1024*1024};
+                    var body = { "request": "create", "rome": myroom, "description": "test", "record": true, "rec_dir": "test", "publishers": 100,/*"audiocodec":"opus","videocodec":"vp9",*/"bitrates":2*1024*1024};
                     sfutest.send({
                         "message": body,
                         success: function (result) {
@@ -582,7 +574,44 @@
                 });
         }
         function addVideoTrack() {
-            var body = { "audio": true, "video": true };
+            hasTrack = true;
+            sfutest.createOffer(
+                {
+                    media: {
+                        addVideo: true,
+                        addAudeo: true,
+                        audioSend: true,
+                        videoSend:true
+                    },
+                    success: function (jsep) {
+                        debugger;
+                        Janus.debug(jsep);
+                        var publish = { "request": "configure", "audio": true, "video": true ,"data": true};
+                        sfutest.send({ "message": publish, "jsep": jsep });
+                    },
+                    error: function (error) {
+                        bootbox.alert("WebRTC error... " + JSON.stringify(error));
+                    }
+                });
+        }
+
+        function updateBandwidthRestriction(sdp, bandwidth) {
+            let modifier = 'AS';
+            if (adapter.browserDetails.browser === 'firefox') {
+                bandwidth = (bandwidth >>> 0) * 1000;
+                modifier = 'TIAS';
+            }
+            if (sdp.indexOf('b=' + modifier + ':') === -1) {
+                // insert b= after c= line.
+                sdp = sdp.replace(/c=IN (.*)\r\n/, 'c=IN $1\r\nb=' + modifier + ':' + bandwidth + '\r\n');
+            } else {
+                sdp = sdp.replace(new RegExp('b=' + modifier + ':.*\r\n'), 'b=' + modifier + ':' + bandwidth + '\r\n');
+            }
+            return sdp;
+        }
+
+        function removeBandwidthRestriction(sdp) {
+            return sdp.replace(/b=AS:.*\r\n/, '').replace(/b=TIAS:.*\r\n/, '');
         }
         //该方法有待商榷
         function screenShare() {
@@ -688,6 +717,7 @@
             sfutest.send({ "message": unpublish });
         }
         function removeSream() {
+            first = true;
             sfutest.createOffer(
                 {
                     media: { removeVideo: true, removeAudio: true, data: true, audioSend: false, videoSend: false },
@@ -721,7 +751,14 @@
                 });
 
         }
-      
+
+        function changeBitrate(bitRate) {
+            var videoSender = sfutest.webrtcStuff.pc.getSenders()[1];
+            var parameters = videoSender.getParameters();
+            parameters.encodings[0].maxBitrate = bitRate;
+            parameters.encodings[0].minBitrate = bitRate;
+            sfutest.webrtcStuff.pc.getSenders()[1].setParameters(parameters);
+        }
         $('#mute').click(function () { toggleMute() });
         $('#unPublish').click(function () { unpublishOwnFeed() });
         $('#publish').click(function () { publishOwnFeed(true); });
@@ -731,6 +768,9 @@
         })
         $('#iceRestart').on('click', function () {
             iceRestart();
+        })
+        $('#addVideoTrack').on('click', function () {
+            addVideoTrack();
         })
         //检测到网络发生变化时，重新进行ICE协商
         function netChange() {
