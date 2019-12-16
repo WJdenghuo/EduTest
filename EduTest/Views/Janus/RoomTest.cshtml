@@ -391,16 +391,7 @@
                     // Add data:true here if you want to publish datachannels as well
                     media: { audioRecv: false, videoRecv: false, audioSend: true, videoSend: true, video: true, audio: true, data: true },	// Publishers are sendonly
                     success: function (jsep) {
-                        Janus.debug("Got publisher SDP!");
-                        //Janus.debug(jsep);
-                        //if (!useAudio) {
-                        //    sfutest.muteAudio();
-                        //    sfutest.muteVideo();
-                        //}
-                        //else {
-                        //     sfutest.unmuteAudio();
-                        //    sfutest.unmuteVideo();
-                        //}
+                        Janus.debug("Got publisher SDP!");                     
                         var publish = { "request": "configure", "audio": true, "video": true ,"data": true};
                         sfutest.send({ "message": publish, "jsep": jsep });
                     },
@@ -725,9 +716,6 @@
                         Janus.debug(jsep);
                         var publish = { "request": "configure", "audio": false, "video": false, "data": true, refresh: true };
                         sfutest.send({ "message": publish, "jsep": jsep });
-                        //sfutest.send({ message: { audio: true, video: true }, "jsep": jsep });
-                        //var publish = { request: "configure", refresh: true };
-                        //sfutest.send({ message: publish, jsep: jsep });
                     },
                     error: function (error) {
                         bootbox.alert("WebRTC error... " + JSON.stringify(error));
