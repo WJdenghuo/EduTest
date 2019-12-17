@@ -59,12 +59,12 @@
     <script>
         //分支合并测试
         //var server = "https://janus.conf.meetecho.com/janus";
-        var server = "https://rtc.cnki.net/janus";
-        //var server = "janus.guoshuai.xyz";
-        //if (window.location.protocol === 'http:')
-        //    server = "http://" + server + ":8088/janus";
-        //else
-        //    server = "https://" + server + ":8089/janus";
+        //var server = "https://rtc.cnki.net/janus";
+        var server = "janus.guoshuai.xyz";
+        if (window.location.protocol === 'http:')
+            server = "http://" + server + ":8088/janus";
+        else
+            server = "https://" + server + ":8089/janus";
         		
 
         var janus = null;
@@ -100,6 +100,7 @@
                         janus = new Janus(
                             {
                                 server: server,
+                                token:'@ViewBag.token',
                                 iceServers: [{ urls: "stun:www.385073012.cn:3478"},{ urls: "turn:www.385073012.cn:3478", username: "cnki", credential: "123456" }],
                                 //iceServers: [
                                 //    { urls: "stun:www.385073012.cn:3478" }, { urls: "turn:www.385073012.cn:3478", username: "cnki", credential: "123456" },

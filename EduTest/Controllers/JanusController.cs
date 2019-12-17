@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Edu.Entity.MySqlEntity;
 using Microsoft.AspNetCore.Mvc;
@@ -37,6 +39,9 @@ namespace EduTest.Controllers
 
                 throw;
             }
+            var data = new List<String>();
+            data.Add("janus.plugin.videoroom");
+            ViewBag.token = GetToken("janus", data);
             return View();
         }
         public IActionResult RoomNoRecorder()
@@ -79,6 +84,18 @@ namespace EduTest.Controllers
         {
             _logger.LogError(e,e.Message,nameof(JanusController));
             return false;
+        }
+        public string HmacSha1Sign(string secret, string strOrgData)
+        {
+            var hmacsha1 = new HMACSHA1(Encoding.UTF8.GetBytes(secret));
+            var dataBuffer = Encoding.UTF8.GetBytes(strOrgData);
+            var hashBytes = hmacsha1.ComputeHash(dataBuffer);
+            return Convert.ToBase64String(hashBytes);
+        }
+        public String GetToken(String relam,List<String> data) 
+        {
+            var hmac = Math.Floor((decimal)DateTime.UtcNow.AddDays(1).Ticks/1000) + "," + relam + "," + String.Join(',', data);
+            return $"{hmac}:{HmacSha1Sign("janus",hmac)}";
         }
     }
 }
