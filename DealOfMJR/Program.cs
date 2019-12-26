@@ -12,13 +12,29 @@ namespace DealOfMJR
             var test = Directory.GetFiles("/test");
             if (test.Length > 0)
             {
-                test.ToList().ForEach(x => Console.WriteLine($"{x}"));
+                test.ToList().ForEach(x => 
+                { 
+                    Console.WriteLine($"{x}");
+                    if (x.Contains("video"))
+                    {
+                        Deal($"{x} {x.Substring(0,x.Length-3)}webm");
+                    }
+                    else if (x.Contains("audio"))
+                    {
+                        Deal($"{x} {x.Substring(0, x.Length - 3)}opus");
+                    }
+                    
+                });
             }
 
             Console.WriteLine("Hello World!");
 
+            
+        }
+        static void Deal(string args) 
+        {
             #region process 测试
-            var psi = new ProcessStartInfo("janus-pp-rec") { RedirectStandardOutput = true };
+            var psi = new ProcessStartInfo("janus-pp-rec", args) { RedirectStandardOutput = true };
             //启动
             var proc = Process.Start(psi);
             if (proc == null)
@@ -43,9 +59,9 @@ namespace DealOfMJR
                 }
                 Console.WriteLine("---------------Read end------------------");
                 //Console.WriteLine($"Total execute time :{(proc.ExitTime - proc.StartTime).TotalMilliseconds} ms");
-                Console.WriteLine($"Exited Code ： {proc.ExitCode}");
-                #endregion
+                //Console.WriteLine($"Exited Code ： {proc.ExitCode}");
             }
+            #endregion
         }
     }
 }
