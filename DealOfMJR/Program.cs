@@ -15,11 +15,11 @@ namespace DealOfMJR
                 test.ToList().ForEach(x => 
                 { 
                     Console.WriteLine($"{x}");
-                    if (x.Contains("video"))
+                    if (x.Contains("video.mjr"))
                     {
                         Deal($"{x} {x.Substring(0,x.Length-3)}webm");
                     }
-                    else if (x.Contains("audio"))
+                    else if (x.Contains("audio.mjr"))
                     {
                         Deal($"{x} {x.Substring(0, x.Length - 3)}opus");
                     }
@@ -35,6 +35,7 @@ namespace DealOfMJR
         {
             #region process 测试
             var psi = new ProcessStartInfo("janus-pp-rec", args) { RedirectStandardOutput = true };
+            Console.WriteLine($"janus-pp-rec {args}");
             //启动
             var proc = Process.Start(psi);
             if (proc == null)
