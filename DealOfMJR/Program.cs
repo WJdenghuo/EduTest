@@ -9,16 +9,19 @@ namespace DealOfMJR
     {
         static void Main(string[] args)
         {
-            var test = Directory.GetFiles("/test");
-            if (test.Length > 0)
+            if (File.Exists("/test")) 
             {
-                test.ToList().ForEach(x => Console.WriteLine($"{x}"));
+                var test = Directory.GetFiles("/test");
+                if (test.Length > 0)
+                {
+                    test.ToList().ForEach(x => Console.WriteLine($"{x}"));
+                }
             }
 
             Console.WriteLine("Hello World!");
 
             #region process 测试
-            var psi = new ProcessStartInfo("dotnet", "--info") { RedirectStandardOutput = true };
+            var psi = new ProcessStartInfo("janus-pp-rec") { RedirectStandardOutput = true };
             //启动
             var proc = Process.Start(psi);
             if (proc == null)
