@@ -27,7 +27,7 @@ namespace DealOfMJR
             }
             test.Where(x => x.Contains("video.mjr")).ToList().ForEach(x =>
               {
-                  Deal("ffmpeg", $"-i {x.Substring(0,x.Length-3)}opus -i {x.Substring(0, x.Length - 3)}webm  -c:v copy -c:a opus -strict experimental {x.Substring(0, x.Length - 4)}-hasDeal.webm");
+                  Deal("ffmpeg", $"-i {x.Substring(0,x.Length-9)}audio.opus -i {x.Substring(0, x.Length - 3)}webm  -c:v copy -c:a opus -strict experimental {x.Substring(0, x.Length - 4)}-hasDeal.webm");
               });
             Console.WriteLine("Hello World!");
 
