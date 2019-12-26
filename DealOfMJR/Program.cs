@@ -9,13 +9,10 @@ namespace DealOfMJR
     {
         static void Main(string[] args)
         {
-            if (File.Exists("/test")) 
+            var test = Directory.GetFiles("/test/");
+            if (test.Length > 0)
             {
-                var test = Directory.GetFiles("/test");
-                if (test.Length > 0)
-                {
-                    test.ToList().ForEach(x => Console.WriteLine($"{x}"));
-                }
+                test.ToList().ForEach(x => Console.WriteLine($"{x}"));
             }
 
             Console.WriteLine("Hello World!");
