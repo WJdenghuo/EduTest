@@ -9,7 +9,7 @@ namespace DealOfMJR
     {
         static void Main(string[] args)
         {
-            var test = Directory.GetFiles("/test/");
+            var test = Directory.GetFiles("/test");
             if (test.Length > 0)
             {
                 test.ToList().ForEach(x => Console.WriteLine($"{x}"));
@@ -42,7 +42,7 @@ namespace DealOfMJR
                     }
                 }
                 Console.WriteLine("---------------Read end------------------");
-                Console.WriteLine($"Total execute time :{(proc.ExitTime - proc.StartTime).TotalMilliseconds} ms");
+                //Console.WriteLine($"Total execute time :{(proc.ExitTime - proc.StartTime).TotalMilliseconds} ms");
                 Console.WriteLine($"Exited Code ： {proc.ExitCode}");
                 #endregion
             }
