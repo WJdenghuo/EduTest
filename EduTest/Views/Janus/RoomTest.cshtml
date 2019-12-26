@@ -59,12 +59,16 @@
     <script>
         //分支合并测试
         //var server = "https://janus.conf.meetecho.com/janus";
-        //var server = "https://rtc.cnki.net/janus";
-        var server = "janus.guoshuai.xyz";
-        if (window.location.protocol === 'http:')
-            server = "http://" + server + ":8088/janus";
-        else
-            server = "https://" + server + ":8089/janus";
+        var server = "wss://janus.guoshuai.xyz/websockets/";
+        //var server = [
+        //    "wss://janus.guoshuai.xyz:8989",
+        //    "/janus"
+        //];
+        //var server = "janus.guoshuai.xyz";
+        //if (window.location.protocol === 'http:')
+        //    server = "http://" + server + ":8088/janus";
+        //else
+        //    server = "https://" + server + ":8089/janus";
         		
 
         var janus = null;
@@ -130,7 +134,7 @@
                                             mediaState: function (medium, on) {
 
                                                 Janus.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
-                                            },
+                                            },                                           
                                             webrtcState: function (on) {
                                                 if (!on) {
                                                     return;
@@ -154,7 +158,7 @@
                                                 Janus.debug(" ::: Got a message (publisher) :::");
                                                 Janus.debug(msg);
                                                 var event = msg["videoroom"];
-                                                Janus.debug("Event: " + event);
+                                                Janus.debug("Event: " + event);                                             
                                                 if (event != undefined && event != null) {
                                                     if (event === "joined") {
                                                         // Publisher/manager created, negotiate WebRTC and attach to existing feeds, if any
@@ -213,7 +217,7 @@
                                                 mystream = stream;
                                                 Janus.debug(stream);
                                                 //非主持人/未经主持人允许 隐藏本地采集，
-                                                //主持人允许触发采集，并在本方法内允许展现本地媒体
+                                                ////主持人允许触发采集，并在本方法内允许展现本地媒体
                                                 if (!first) {
                                                     return false;
                                                 }
@@ -294,6 +298,9 @@
                             var list = msg["publishers"];                          
                         }
                         var event = msg["videoroom"];
+                        if (event == "slow_link") {
+                            console.warn("当前网络状况不佳");
+                        }
                         Janus.debug("Event: " + event);
                         if (msg["error"] !== undefined && msg["error"] !== null) {
                             bootbox.alert(msg["error"]);
@@ -348,6 +355,11 @@
                         var json = JSON.parse(data);
                         $('#channel').val(json["text"]);
                     },
+                    slowLink: function (on, e) {
+                        if (on) {
+                            console.warn("当前网络状况不佳！");
+                        }
+                    },
                     webrtcState: function (on) {
                         Janus.log("Janus says this WebRTC PeerConnection (feed #" + remoteFeed.rfindex + ") is " + (on ? "up" : "down") + " now");
                     },
@@ -390,7 +402,7 @@
             sfutest.createOffer(
                 {
                     // Add data:true here if you want to publish datachannels as well
-                    media: { audioRecv: false, videoRecv: false, audioSend: true, videoSend: true, video: true, audio: true, data: true },	// Publishers are sendonly
+                    media: { audioRecv: false, videoRecv: false, audioSend: true, videoSend: true, data: true },	// Publishers are sendonly
                     success: function (jsep) {
                         Janus.debug("Got publisher SDP!");                     
                         var publish = { "request": "configure", "audio": true, "video": true ,"data": true};
@@ -417,7 +429,7 @@
                     sfutest.send({ "message": register });
                 }
                 else {
-                    var body = { "request": "create", "rome": myroom, "description": "test", "record": true, "rec_dir": "test", "publishers": 100,/*"audiocodec":"opus","videocodec":"vp9",*/"bitrates":2*1024*1024};
+                    var body = { "request": "create", "rome": myroom, "description": "test", /*"record": true, "rec_dir": "test",*/ "publishers": 100,/*"audiocodec":"opus","videocodec":"vp9",*/"bitrates":128*1024};
                     sfutest.send({
                         "message": body,
                         success: function (result) {

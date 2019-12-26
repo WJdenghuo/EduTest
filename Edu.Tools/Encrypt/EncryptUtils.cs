@@ -207,5 +207,15 @@ namespace Edu.Tools
         }
 
         #endregion
+
+        #region HMAC
+        public static string HmacSha1Sign(string secret, string strOrgData)
+        {
+            var hmacsha1 = new HMACSHA1(Encoding.UTF8.GetBytes(secret));
+            var dataBuffer = Encoding.UTF8.GetBytes(strOrgData);
+            var hashBytes = hmacsha1.ComputeHash(dataBuffer);
+            return Convert.ToBase64String(hashBytes);
+        }
+        #endregion
     }
 }
