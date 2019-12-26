@@ -9,33 +9,35 @@ namespace DealOfMJR
     {
         static void Main(string[] args)
         {
-            var test = Directory.GetFiles("/test");
-            if (test.Length > 0)
+            var test = Directory.GetFiles("/test").Where(x=>Path.GetExtension(x)==".mjr").ToList();
+            if (test.Count > 0)
             {
-                test.ToList().ForEach(x => 
+                test.ForEach(x => 
                 { 
                     Console.WriteLine($"{x}");
                     if (x.Contains("video.mjr"))
                     {
-                        Deal($"{x} {x.Substring(0,x.Length-3)}webm");
+                        Deal("janus-pp-rec",$"{x} {x.Substring(0,x.Length-3)}webm");
                     }
                     else if (x.Contains("audio.mjr"))
                     {
-                        Deal($"{x} {x.Substring(0, x.Length - 3)}opus");
+                        Deal("janus-pp-rec", $"{x} {x.Substring(0, x.Length - 3)}opus");
                     }
-                    
                 });
             }
-
+            test.Where(x => x.Contains("video.mjr")).ToList().ForEach(x =>
+              {
+                  Deal("ffmpeg", $"-i {x.Substring(0,x.Length-3)}opus -i {x.Substring(0, x.Length - 3)}webm  -c:v copy -c:a opus -strict experimental {x.Substring(0, x.Length - 4)}-hasDeal.webm");
+              });
             Console.WriteLine("Hello World!");
 
             
         }
-        static void Deal(string args) 
+        static void Deal(String fileName,string args) 
         {
             #region process 测试
-            var psi = new ProcessStartInfo("janus-pp-rec", args) { RedirectStandardOutput = true };
-            Console.WriteLine($"janus-pp-rec {args}");
+            var psi = new ProcessStartInfo(fileName, args) { RedirectStandardOutput = true };
+            Console.WriteLine($"{fileName} {args}");
             //启动
             var proc = Process.Start(psi);
             if (proc == null)
