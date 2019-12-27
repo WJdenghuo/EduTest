@@ -115,7 +115,7 @@ namespace Receive
             }
             test.Where(x => x.Contains("video.mjr")).ToList().ForEach(x =>
             {
-                Deal("sudo ffmpeg", $"-i {x.Substring(0, x.Length - 9)}audio.opus -i {x.Substring(0, x.Length - 3)}webm  -c:v copy -c:a opus -y -strict experimental {x.Substring(0, x.Length - 4)}-hasDeal.webm");
+                Deal("ffmpeg", $"-i {x[0..^9]}audio.opus -i {x[0..^3]}webm  -c:v copy -c:a opus -y -strict experimental {x[0..^4]}-hasDeal.webm");
             });
             Console.WriteLine("Hello World!");
 
