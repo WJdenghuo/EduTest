@@ -16,7 +16,7 @@ namespace Receive
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main()
         {
             var factory = new ConnectionFactory()
             {
@@ -26,76 +26,74 @@ namespace Receive
                 AutomaticRecoveryEnabled = true,
                 TopologyRecoveryEnabled = true
             };
-            using var connection = factory.CreateConnection(new string[]
-            {
+            using (var connection = factory.CreateConnection(new string[]
+                {
                 "106.13.116.83",
                 "62.234.105.58"
-            });
-            using var channel = connection.CreateModel();
-
-            //#region 简单应用
-            //channel.QueueDeclare(queue: "hello1",
-            //                    durable: false,
-            //                    exclusive: false,
-            //                    autoDelete: false,
-            //                    arguments: null);
-            //var consumer = new EventingBasicConsumer(channel);
-            //consumer.Received += (model, ea) =>
-            //{
-            //    var body = ea.Body;
-            //    var message = Encoding.UTF8.GetString(body);
-            //    Console.WriteLine(" [x] Received {0}", message);
-            //};
-            //channel.BasicConsume(queue: "hello1",
-            //                     autoAck: true,
-            //                     consumer: consumer);
-            //#endregion
-
-
-            #region RPC
-            //申明队列接收远程调用请求
-            channel.QueueDeclare(queue: "rpc_queue", durable: false,
-                exclusive: false, autoDelete: false, arguments: null);
-            var consumer = new EventingBasicConsumer(channel);
-            Console.WriteLine("[*] Waiting for message.");
-            //请求处理逻辑
-            consumer.Received += (model, ea) =>
+                }))
+            using (var channel = connection.CreateModel())
             {
-                var message = Encoding.UTF8.GetString(ea.Body);
+                channel.QueueDeclare(queue: "rpc_queue", durable: false,
+                  exclusive: false, autoDelete: false, arguments: null);
+                channel.BasicQos(0, 1, false);
+                var consumer = new EventingBasicConsumer(channel);
+                channel.BasicConsume(queue: "rpc_queue",
+                  autoAck: false, consumer: consumer);
+                Console.WriteLine(" [x] Awaiting RPC requests");
 
-                DealCommand dealCommand = new DealCommand();
-                dealCommand = JsonHelper.Deserialize<DealCommand>(message);
-                //if (dealCommand.All)
-                //{
-                //    Deal();
-                //}
-                var test = Directory.GetFiles("/test").Where(x => x.Contains("hasDeal.webm")).ToList();
-                List<JanusRecordMedia> janusRecordMedias = new List<JanusRecordMedia>();
-                test.ForEach(x =>
+                consumer.Received += (model, ea) =>
                 {
-                    janusRecordMedias.Add(new JanusRecordMedia() { FileName = x });
-                });
-                var resposeMessage = JsonHelper.Serialize(test);
-                Console.WriteLine(resposeMessage);
-                //Thread.Sleep(12000);//模拟耗时
-                //从请求的参数中获取请求的唯一标识，在消息回传时同样绑定
-                var properties = ea.BasicProperties;
-                var replyProerties = channel.CreateBasicProperties();
-                replyProerties.CorrelationId = properties.CorrelationId;
-                //将远程调用结果发送到客户端监听的队列上
-                channel.BasicPublish(exchange: "", routingKey: properties.ReplyTo,
-                basicProperties: replyProerties, body: Encoding.UTF8.GetBytes(resposeMessage));
-                //手动发回消息确认
-                channel.BasicAck(ea.DeliveryTag, false);
-                //Console.WriteLine($"Return result: Fib({n})= {result}");
-            };
-            channel.BasicConsume(queue: "rpc_queue", autoAck: false, consumer: consumer);
-            #endregion
-            Console.WriteLine(" Press [enter] to exit.");
-            Console.ReadLine();
+                    string response = null;
+
+                    var body = ea.Body;
+                    var props = ea.BasicProperties;
+                    var replyProps = channel.CreateBasicProperties();
+                    replyProps.CorrelationId = props.CorrelationId;
+
+                    try
+                    {
+                        var message = Encoding.UTF8.GetString(body);
+
+                        Console.WriteLine($"receive message{message}");
+                        response = GetDealed();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(" [.] " + e.Message);
+                        response = "";
+                    }
+                    finally
+                    {
+                        var responseBytes = Encoding.UTF8.GetBytes(response);
+                        channel.BasicPublish(exchange: "", routingKey: props.ReplyTo,
+                          basicProperties: replyProps, body: responseBytes);
+                        channel.BasicAck(deliveryTag: ea.DeliveryTag,
+                          multiple: false);
+                    }
+                };
+
+                Console.WriteLine(" Press [enter] to exit.");
+                Console.ReadLine();
+            }
         }
 
-        static void Deal()
+        /// 
+
+        /// Assumes only valid positive integer input.
+        /// Don't expect this one to work for big numbers, and it's
+        /// probably the slowest recursive implementation possible.
+        /// 
+        private static int Fib(int n)
+        {
+            if (n == 0 || n == 1)
+            {
+                return n;
+            }
+
+            return Fib(n - 1) + Fib(n - 2);
+        }
+
+        static String GetDealed()
         {
             var test = Directory.GetFiles("/test").Where(x => Path.GetExtension(x) == ".mjr").ToList();
             if (test.Count > 0)
@@ -117,9 +115,7 @@ namespace Receive
             {
                 Deal("ffmpeg", $"-i {x[0..^9]}audio.opus -i {x[0..^3]}webm  -c:v copy -c:a opus -y -strict experimental {x[0..^4]}-hasDeal.webm");
             });
-            Console.WriteLine("Hello World!");
-
-
+            return JsonHelper.Serialize(test);
         }
         static void Deal(String fileName, string args)
         {
