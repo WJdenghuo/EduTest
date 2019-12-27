@@ -96,6 +96,7 @@ namespace Send
                  * 
                  * ----------------------------------------
                  */
+
                 //发布消息
                 channel.BasicPublish(exchange: "", routingKey: "rpc_queue", basicProperties: properties, body: body);
                 //Console.WriteLine($"[*] Request fib({number})");

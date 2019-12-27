@@ -75,6 +75,8 @@ namespace Receive
                 {
                     janusRecordMedias.Add(new JanusRecordMedia() { FileName = x });
                 });
+                var resposeMessage = JsonHelper.Serialize(test);
+                Console.WriteLine(resposeMessage);
                 //Thread.Sleep(12000);//模拟耗时
                 //从请求的参数中获取请求的唯一标识，在消息回传时同样绑定
                 var properties = ea.BasicProperties;
@@ -82,7 +84,7 @@ namespace Receive
                 replyProerties.CorrelationId = properties.CorrelationId;
                 //将远程调用结果发送到客户端监听的队列上
                 channel.BasicPublish(exchange: "", routingKey: properties.ReplyTo,
-                basicProperties: replyProerties, body: Encoding.UTF8.GetBytes(JsonHelper.Serialize(test)));
+                basicProperties: replyProerties, body: Encoding.UTF8.GetBytes(resposeMessage));
                 //手动发回消息确认
                 channel.BasicAck(ea.DeliveryTag, false);
                 //Console.WriteLine($"Return result: Fib({n})= {result}");
@@ -113,7 +115,7 @@ namespace Receive
             }
             test.Where(x => x.Contains("video.mjr")).ToList().ForEach(x =>
             {
-                Deal("ffmpeg", $"-i {x.Substring(0, x.Length - 9)}audio.opus -i {x.Substring(0, x.Length - 3)}webm  -c:v copy -c:a opus -strict experimental {x.Substring(0, x.Length - 4)}-hasDeal.webm");
+                Deal("sudo ffmpeg", $"-i {x.Substring(0, x.Length - 9)}audio.opus -i {x.Substring(0, x.Length - 3)}webm  -c:v copy -c:a opus -y -strict experimental {x.Substring(0, x.Length - 4)}-hasDeal.webm");
             });
             Console.WriteLine("Hello World!");
 
