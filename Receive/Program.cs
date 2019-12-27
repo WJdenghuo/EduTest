@@ -65,10 +65,10 @@ namespace Receive
 
                 DealCommand dealCommand = new DealCommand();
                 dealCommand = JsonHelper.Deserialize<DealCommand>(message);
-                if (dealCommand.All)
-                {
-                    Deal();
-                }
+                //if (dealCommand.All)
+                //{
+                //    Deal();
+                //}
                 var test = Directory.GetFiles("/test").Where(x => x.Contains("hasDeal.webm")).ToList();
                 List<JanusRecordMedia> janusRecordMedias = new List<JanusRecordMedia>();
                 test.ForEach(x =>
