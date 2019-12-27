@@ -15,7 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Edu.Tools", "Edu.Tools\Edu.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PDFToImages", "PDFToImages\PDFToImages.csproj", "{1216A1C1-B8C1-44E9-9622-45CC84595021}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DealOfMJR", "DealOfMJR\DealOfMJR.csproj", "{02424579-6B0B-4623-9DED-38ACDDCD6F7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DealOfMJR", "DealOfMJR\DealOfMJR.csproj", "{02424579-6B0B-4623-9DED-38ACDDCD6F7A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Send", "E:\Send\Send.csproj", "{B4FDD3FD-E712-4578-ACB2-332300ED9F73}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Receive", "E:\Receive\Receive.csproj", "{EEE3D772-3BCA-4876-A46E-7771FCE93E4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +55,14 @@ Global
 		{02424579-6B0B-4623-9DED-38ACDDCD6F7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02424579-6B0B-4623-9DED-38ACDDCD6F7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02424579-6B0B-4623-9DED-38ACDDCD6F7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4FDD3FD-E712-4578-ACB2-332300ED9F73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4FDD3FD-E712-4578-ACB2-332300ED9F73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4FDD3FD-E712-4578-ACB2-332300ED9F73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4FDD3FD-E712-4578-ACB2-332300ED9F73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEE3D772-3BCA-4876-A46E-7771FCE93E4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEE3D772-3BCA-4876-A46E-7771FCE93E4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEE3D772-3BCA-4876-A46E-7771FCE93E4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEE3D772-3BCA-4876-A46E-7771FCE93E4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
