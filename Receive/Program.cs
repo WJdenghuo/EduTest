@@ -1,5 +1,4 @@
 ﻿using Edu.Models.Models;
-using Edu.Tools;
 using EduTest.Controllers.API;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -55,7 +54,8 @@ namespace Receive
                         var message = Encoding.UTF8.GetString(body);
 
                         Console.WriteLine($"receive message{message}");
-                        response = GetDealed();
+                        //response = GetDealed();
+                        response = message;
                     }
                     catch (Exception e)
                     {
@@ -115,8 +115,9 @@ namespace Receive
             {
                 Deal("ffmpeg", $"-i {x[0..^9]}audio.opus -i {x[0..^3]}webm  -c:v copy -c:a opus -y -strict experimental {x[0..^4]}-hasDeal.webm");
             });
-            return JsonHelper.Serialize(test);
+            return Edu.Tools.JsonHelper.Serialize(test);
         }
+        
         static void Deal(String fileName, string args)
         {
             #region process 测试
@@ -151,4 +152,5 @@ namespace Receive
             #endregion
         }
     }
+
 }

@@ -8,6 +8,7 @@ using Edu.Models.Models;
 using Edu.Service;
 using Edu.Service.Admin;
 using Edu.Service.MediatR;
+using Edu.Tools;
 using Edu.Tools.Redis;
 using EduTest.Hubs;
 using EduTest.Infrastructure.Filters;
@@ -121,6 +122,7 @@ namespace EduTest
             services.AddSingleton<IEsClientProvider, EsClientProvider>();
             services.AddMediatR(typeof(PingHandler).Assembly,
                                 typeof(Pong1).Assembly, typeof(Pong2).Assembly);
+            services.AddSingleton<RpcClient>();
             services.AddSingleton<ConnectionMultiplexer>(sp =>
             {
                 var settings = sp.GetRequiredService<IOptions<RedisSetting>>().Value;
@@ -208,7 +210,7 @@ namespace EduTest
             //container.RegisterGeneric(typeof(SugarRepository<>)).As(typeof(IRepository<>));
             return new AutofacServiceProvider(container.Build());
         }
-        private async Task Echo(HttpContext context, WebSocket webSocket)
+        private async Task Echo(Microsoft.AspNetCore.Http.HttpContext context, WebSocket webSocket)
         {
             var buffer = new byte[1024 * 4];
             WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
