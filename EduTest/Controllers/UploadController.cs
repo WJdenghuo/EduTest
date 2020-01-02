@@ -13,8 +13,8 @@ namespace EduTest.Controllers
     public class UploadController : Controller
     {
         private readonly ILogger _logger;
-        private readonly IHostingEnvironment _hostingEnvironment;
-        public UploadController(ILogger<UploadController> logger, IHostingEnvironment hostingEnvironment)
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        public UploadController(ILogger<UploadController> logger, IWebHostEnvironment hostingEnvironment)
         {
             _logger = logger;
             _hostingEnvironment = hostingEnvironment;

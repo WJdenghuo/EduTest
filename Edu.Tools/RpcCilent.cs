@@ -16,7 +16,7 @@ namespace Edu.Tools
         private readonly BlockingCollection<string> respQueue = new BlockingCollection<string>();
         private readonly IBasicProperties props;
 
-        private RpcClient()
+        public RpcClient()
         {
             var factory = new ConnectionFactory()
             {

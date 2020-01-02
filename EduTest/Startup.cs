@@ -1,4 +1,5 @@
-﻿using AspNetCoreRateLimit;
+﻿using AspectCore.Extensions.Autofac;
+using AspNetCoreRateLimit;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Edu.Entity;
@@ -22,6 +23,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -32,9 +34,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using MySqlConnector.Logging;
 using Newtonsoft.Json;
 using StackExchange.Redis;
@@ -54,16 +58,15 @@ namespace EduTest
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, ILogger<Startup> logger)
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            _logger = logger;
         }
 
         public IConfiguration Configuration { get; }
-        private readonly ILogger _logger;
+        //private readonly ILogger _logger;
         // This method gets called by the runtime. Use this method to add services to the container.
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
 
             /*
@@ -162,7 +165,7 @@ namespace EduTest
                 });
 
             //
-            services.AddMvc(options =>
+            services.AddControllersWithViews(options =>
             {
                 //options.RespectBrowserAcceptHeader = true; // false by default
 
@@ -174,19 +177,19 @@ namespace EduTest
             })
             //忽略循环引用
             //.AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            .SetCompatibilityVersion(CompatibilityVersion.Latest);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
-
+            //services.AddSwaggerGenNewtonsoftSupport();
             services.AddCors(options => 
             {
                 options.AddPolicy("janus",p => p.AllowAnyOrigin());
@@ -203,12 +206,12 @@ namespace EduTest
             services.AddSignalR();
             //使用autofac替换容器后，启动速度会慢很多。
             services.AddOptions();
-            var container = new ContainerBuilder();
-            container.Populate(services);
-            //向容器注入服务示例
-            //container.RegisterType<Account>().AsSelf().As<IAccount>().InstancePerLifetimeScope();
-            //container.RegisterGeneric(typeof(SugarRepository<>)).As(typeof(IRepository<>));
-            return new AutofacServiceProvider(container.Build());
+            //var container = new ContainerBuilder();
+            //container.Populate(services);
+            ////向容器注入服务示例
+            ////container.RegisterType<Account>().AsSelf().As<IAccount>().InstancePerLifetimeScope();
+            ////container.RegisterGeneric(typeof(SugarRepository<>)).As(typeof(IRepository<>));
+            //return new AutofacServiceProvider(container.Build());
         }
         private async Task Echo(Microsoft.AspNetCore.Http.HttpContext context, WebSocket webSocket)
         {
@@ -223,7 +226,7 @@ namespace EduTest
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             //NLog.LogManager.LoadConfiguration("nlog.config").GetCurrentClassLogger();
             //NLog.LogManager.Configuration.Variables["connectionString"] = Configuration.GetConnectionString("DefaultConnection"); Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);  //避免日志中的中文输出乱码
@@ -313,23 +316,35 @@ namespace EduTest
 
             //});
             app.UseCors("janus");
-            app.UseMvc(routes =>
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-                routes.MapRoute(
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
                     name: "areaname",
-                    template: "{Admin:exists}/{controller=Home}/{action=Index}/{id?}");
-                routes.MapAreaRoute(
+                    pattern: "{Admin:exists}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapAreaControllerRoute(
                     name: "Admin",
                     areaName: "Admin",
-                    template: "Admin/{controller=Home}/{action=Index}");
-            });
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<ChatHub>("/chatHub");
+                    pattern: "Admin/{controller=Home}/{action=Index}");
+
+                endpoints.MapHub<ChatHub>("/chatHub", options =>
+                {
+                    options.Transports =
+                        HttpTransportType.WebSockets |
+                        HttpTransportType.LongPolling;
+                });
             });
         }
+
+
+        //public void ConfigureContainer(ContainerBuilder builder)
+        //{
+        //    builder.RegisterAssemblyTypes(typeof(Program).Assembly).
+        //        Where(x => x.Name.EndsWith("service", StringComparison.OrdinalIgnoreCase)).AsImplementedInterfaces();
+        //    builder.RegisterDynamicProxy();
+        //}
     }
 }
