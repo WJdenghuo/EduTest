@@ -1,0 +1,38 @@
+﻿
+@{
+    //Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Janus</title>
+</head>
+<body>
+    <h1>一、参考资料</h1>
+    <ul>
+        <li><a href="https://github.com/meetecho/janus-gateway" target="_blank">github 地址</a></li>
+        <li><a href="https://janus.conf.meetecho.com/" target="_blank">官方文档及demo</a></li>
+        <li><a href="https://www.guoshuai.xyz/" target="_blank">本人学习demo</a></li>
+    </ul>
+    <h1>二、ubuntu 16.4 安装janus（不再详述，请参照以下大佬的文章）</h1>
+    <ul>
+        <li><a href="https://blog.csdn.net/cgs1999/article/details/89881401" target="_blank">janus安装</a></li>
+        <li><a href="https://blog.csdn.net/cgs1999/article/details/89881733" target="_blank">https</a></li>
+    </ul>
+    <h1>三、学习过程中记录的问题如下</h1>
+    <h2>①No package 'libconfig' found</h2>
+    <ul>
+        <li>apt-get install libconfig-dev</li>
+        <li>或sudo apt-get install libconfig8-dev</li>
+    </ul>
+    <h2>②录制转码 janus-pp-rec</h2>
+    <ul>
+        <li><a href="https://janus.conf.meetecho.com/docs/janus-pp-rec_8c.html" target="_blank">官方说明</a></li>
+        <li><a href="" target="_blank">./configure --enable-post-processing</a></li>
+        <li>第二步缺少依赖包解决方案：sudo aptitude install libavcodec-dev libavformat-dev libswscale-dev libavutil-dev</li>
+    </ul>
+</body>
+</html>
