@@ -25,12 +25,12 @@ namespace EduTest.Controllers.API
 
         [HttpGet]
         [Route("RPCTest")]
-        public String Test()
+        public String Test([FromForm][FromBody]DealCommand dealCommand)
         {
-            DealCommand dealCommand = new DealCommand()
+            if (dealCommand==null)
             {
-                All = true
-            };
+                return "不能为空！";
+            }
             var body = JsonHelper.Serialize(dealCommand);
             //仅作为测试，视频处理需要时间很长，相关逻辑可以在回调中实现，
             //事件总线研究中，后续实现源和处理的解耦

@@ -9,6 +9,6 @@ namespace Edu.Models.Models
         public String FileName { get; set; }
         public String RoomID { get; set; }
         public String UserID { get; set; }
-        public String CreateTricks { get; set; }
+        public Int64 CreateTricks { get; set; }
     }
 }
