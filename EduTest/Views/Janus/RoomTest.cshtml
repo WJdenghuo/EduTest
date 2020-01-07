@@ -215,12 +215,12 @@
                                                 
                                                 Janus.debug(" ::: Got a local stream :::");
                                                 mystream = stream;
-                                                Janus.debug(stream);
-                                                //非主持人/未经主持人允许 隐藏本地采集，
-                                                ////主持人允许触发采集，并在本方法内允许展现本地媒体
-                                                if (!first) {
-                                                    return false;
-                                                }
+                                                //Janus.debug(stream);
+                                                ////非主持人/未经主持人允许 隐藏本地采集，
+                                                //////主持人允许触发采集，并在本方法内允许展现本地媒体
+                                                //if (!first) {
+                                                //    return false;
+                                                //}
                                                 Janus.attachMediaStream($('#local').get(0), stream);
                                             },
                                             ondataopen: function (data) {
