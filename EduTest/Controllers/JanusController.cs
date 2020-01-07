@@ -8,6 +8,7 @@ using Edu.Entity.MySqlEntity;
 using Edu.Tools;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 
 namespace EduTest.Controllers
 {
@@ -15,10 +16,12 @@ namespace EduTest.Controllers
     {
         private readonly ILogger _logger;
         private readonly BaseEduContext _baseEduContext;
-        public JanusController(ILogger<JanusController> logger, BaseEduContext baseEduContext)
+        private readonly ConnectionMultiplexer _redis;
+        public JanusController(ILogger<JanusController> logger, BaseEduContext baseEduContext,ConnectionMultiplexer redis)
         {
             _logger = logger;
             _baseEduContext = baseEduContext;
+            _redis = redis;
         }
         public IActionResult Index()
         {
@@ -91,8 +94,20 @@ namespace EduTest.Controllers
         {
             //参照janus要求实现
             //<timestamp>,janus,<plugin1>[,plugin2...]:<signature>
-            var hmac = Math.Floor((decimal)DateTime.UtcNow.AddDays(1).Ticks/1000) + "," + relam + "," + String.Join(',', data);
-            return $"{hmac}:{EncryptUtils.HmacSha1Sign("janus",hmac)}";
+            var redisHelper = _redis.GetDatabase();
+            var token = String.Empty;
+            token=redisHelper.StringGet("janusToken");
+            if (!String.IsNullOrEmpty(token))
+            {
+                return token;
+            }
+            else
+            {
+                var hmac = Math.Floor((decimal)DateTime.UtcNow.AddDays(1).Ticks / 1000) + "," + relam + "," + String.Join(',', data);
+                redisHelper.StringSet("janusToken", hmac, new TimeSpan(1, 0, 0, 0));
+                return $"{hmac}:{EncryptUtils.HmacSha1Sign("janus", hmac)}";
+            }
+            
         }
     }
 }

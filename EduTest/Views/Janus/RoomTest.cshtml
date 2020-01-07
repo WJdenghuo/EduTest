@@ -104,7 +104,7 @@
                         janus = new Janus(
                             {
                                 server: server,
-                                token:'@ViewBag.token',
+                                //token:'@ViewBag.token',
                                 iceServers: [{ urls: "stun:www.385073012.cn:3478"},{ urls: "turn:www.385073012.cn:3478", username: "cnki", credential: "123456" }],
                                 //iceServers: [
                                 //    { urls: "stun:www.385073012.cn:3478" }, { urls: "turn:www.385073012.cn:3478", username: "cnki", credential: "123456" },
@@ -139,7 +139,7 @@
                                                 if (!on) {
                                                     return;
                                                 }
-                                                removeSream();
+                                                //removeSream();
                                                 $("#bitrate").on("change", function () {
                                                     var id = $(this).val();
                                                     var bitrate = parseInt(id) * 1024;
@@ -429,7 +429,7 @@
                     sfutest.send({ "message": register });
                 }
                 else {
-                    var body = { "request": "create", "rome": myroom, "description": "test", /*"record": true, "rec_dir": "test",*/ "publishers": 100,/*"audiocodec":"opus","videocodec":"vp9",*/"bitrates":128*1024};
+                    var body = { "request": "create", "rome": myroom, "description": "test", "record": true, "rec_dir": "test", "publishers": 100,/*"audiocodec":"opus","videocodec":"vp9",*/"bitrates":128*1024};
                     sfutest.send({
                         "message": body,
                         success: function (result) {
