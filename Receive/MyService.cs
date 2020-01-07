@@ -58,7 +58,7 @@ namespace Receive
             };
             using (var connection = factory.CreateConnection(new string[]
                 {
-                "106.13.116.83",
+                "49.233.130.117",
                 "62.234.105.58"
                 }))
             using (var channel = connection.CreateModel())
@@ -126,6 +126,7 @@ namespace Receive
              */
             List<String> listPath = new List<string>();
             List<JanusRecordMedia> janusRecordMedias = new List<JanusRecordMedia>();
+            List<String> listDealedPath = new List<string>();
             Directory.GetFiles("/test")
                 .Where(x => Path.GetExtension(x) == ".mjr").ToList()?
                 .ForEach(x =>
@@ -148,11 +149,11 @@ namespace Receive
                     {
                         if (x.FileName.Contains("video.mjr"))
                         {
-                            Deal("janus-pp-rec", $"{x} {x.FileName[0..^3]}webm");
+                            Deal("janus-pp-rec", $"{x.FileName} {x.FileName[0..^3]}webm");
                         }
                         else if (x.FileName.Contains("audio.mjr"))
                         {
-                            Deal("janus-pp-rec", $"{x} {x.FileName[0..^3]}opus");
+                            Deal("janus-pp-rec", $"{x.FileName} {x.FileName[0..^3]}opus");
                         }
                         listPath.Add(x.FileName);
                     });
@@ -169,11 +170,11 @@ namespace Receive
                     {
                         if (x.FileName.Contains("video.mjr"))
                         {
-                            Deal("janus-pp-rec", $"{x} {x.FileName[0..^3]}webm");
+                            Deal("janus-pp-rec", $"{x.FileName} {x.FileName[0..^3]}webm");
                         }
                         else if (x.FileName.Contains("audio.mjr"))
                         {
-                            Deal("janus-pp-rec", $"{x} {x.FileName[0..^3]}opus");
+                            Deal("janus-pp-rec", $"{x.FileName} {x.FileName[0..^3]}opus");
                         }
                         listPath.Add(x.FileName);
                     });
@@ -181,8 +182,9 @@ namespace Receive
             listPath.Where(x => x.Contains("video.mjr")).ToList().ForEach(x =>
             {
                 Deal("ffmpeg", $"-i {x[0..^9]}audio.opus -i {x[0..^3]}webm  -c:v copy -c:a opus -y -strict experimental {x[0..^4]}-hasDeal.webm");
+                listDealedPath.Add(x[0..^4] + "-hasDeal.webm");
             });
-            return Edu.Tools.JsonHelper.Serialize(listPath);
+            return Edu.Tools.JsonHelper.Serialize(listDealedPath);
         }
         static void Deal(String fileName, string args)
         {
