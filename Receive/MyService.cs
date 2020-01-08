@@ -142,7 +142,25 @@ namespace Receive
                 });
             if (dealCommand.All)
             {
-                janusRecordMedias?
+                if (String.IsNullOrEmpty(dealCommand.RoomID))
+                {
+                    janusRecordMedias?
+                    .ForEach(x =>
+                    {
+                        if (x.FileName.Contains("video.mjr"))
+                        {
+                            Deal("janus-pp-rec", $"{x.FileName} {x.FileName[0..^3]}webm");
+                        }
+                        else if (x.FileName.Contains("audio.mjr"))
+                        {
+                            Deal("janus-pp-rec", $"{x.FileName} {x.FileName[0..^3]}opus");
+                        }
+                        listPath.Add(x.FileName);
+                    });
+                }
+                else
+                {
+                    janusRecordMedias?
                     .Where(x => x.RoomID == dealCommand.RoomID)
                     .ToList()
                     .ForEach(x =>
@@ -157,6 +175,8 @@ namespace Receive
                         }
                         listPath.Add(x.FileName);
                     });
+                }
+                
             }
             else
             {

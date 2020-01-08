@@ -59,16 +59,16 @@
     <script>
         //分支合并测试
         //var server = "https://janus.conf.meetecho.com/janus";
-        var server = "wss://www.guoshuai.xyz/websockets/";
+        //var server = "wss://www.guoshuai.xyz/websockets/";
         //var server = [
         //    "wss://janus.guoshuai.xyz:8989",
         //    "/janus"
         //];
-        //var server = "janus.guoshuai.xyz";
-        //if (window.location.protocol === 'http:')
-        //    server = "http://" + server + ":8088/janus";
-        //else
-        //    server = "https://" + server + ":8089/janus";
+        var server = "janus.guoshuai.xyz";
+        if (window.location.protocol === 'http:')
+            server = "http://" + server + ":8088/janus";
+        else
+            server = "https://" + server + ":8089/janus";
         		
 
         var janus = null;
@@ -419,17 +419,7 @@
                 });
         }
         function createRoom() {
-            $.post("/Janus/RoomExist?roomID=" + myroom, function (msg) {
-                console.log("msg:" + msg);
-                if (msg != "") {
-                    console.log("+1");
-                    msg = parseInt(msg);
-                    uRoomeID = msg;
-                    var register = { "request": "join", "room": msg, "ptype": "publisher", "display": myusername };
-                    sfutest.send({ "message": register });
-                }
-                else {
-                    var body = { "request": "create", "rome": myroom, "description": "test", "record": true, "rec_dir": "test", "publishers": 100,/*"audiocodec":"opus","videocodec":"vp9",*/"bitrates":128*1024};
+            var body = { "request": "create", "rome": myroom, "description": "test", "record": true, "rec_dir": "test", "publishers": 100,/*"audiocodec":"opus","videocodec":"vp9",*/"bitrates":128*1024};
                     sfutest.send({
                         "message": body,
                         success: function (result) {
@@ -445,8 +435,19 @@
                             sfutest.send({ "message": register });
                         }
                     })
-                }
-            })
+            //$.post("/Janus/RoomExist?roomID=" + myroom, function (msg) {
+            //    console.log("msg:" + msg);
+            //    if (msg != "") {
+            //        console.log("+1");
+            //        msg = parseInt(msg);
+            //        uRoomeID = msg;
+            //        var register = { "request": "join", "room": msg, "ptype": "publisher", "display": myusername };
+            //        sfutest.send({ "message": register });
+            //    }
+            //    else {
+                    
+            //    }
+            //})
         }
         function updateRecsList() {
 
