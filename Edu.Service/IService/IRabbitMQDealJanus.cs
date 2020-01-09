@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Edu.Service.IService
+namespace Edu.Service
 {
     public interface IRabbitMQDealJanus
     {

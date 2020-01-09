@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Edu.Service.Service;
+using Edu.Service;
 using Edu.Tools;
 using EduTest.Models.Models;
 using Microsoft.AspNetCore.Http;
@@ -13,14 +13,14 @@ using Microsoft.Extensions.Logging;
 
 namespace EduTest.Controllers.API
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class JanusFileDealController : ControllerBase
     {
         private readonly ILogger _logger;
         private readonly RpcClient _rpcClient;
-        private readonly RabbitMQDealJanus _rabbitMQDealJanus;
-        public JanusFileDealController(ILogger<JanusFileDealController> logger, RpcClient rpcClient, RabbitMQDealJanus rabbitMQDealJanus)
+        private readonly IRabbitMQDealJanus _rabbitMQDealJanus;
+        public JanusFileDealController(ILogger<JanusFileDealController> logger, RpcClient rpcClient, IRabbitMQDealJanus rabbitMQDealJanus)
         {
             _logger = logger;
             _rpcClient = rpcClient;
@@ -48,6 +48,7 @@ namespace EduTest.Controllers.API
         /// <param name="path">路径</param>
         /// <returns>文件流</returns>
         [HttpPost]
+        [Route("Download")]
         public async Task<HttpResponseMessage> Download(String path)
         {
             return await _rabbitMQDealJanus.DownloadAsync(path);

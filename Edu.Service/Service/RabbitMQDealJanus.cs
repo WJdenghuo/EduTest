@@ -1,4 +1,4 @@
-﻿using Edu.Service.IService;
+﻿
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -10,11 +10,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace Edu.Service.Service
+namespace Edu.Service
 {
     public class RabbitMQDealJanus : IRabbitMQDealJanus
     {
-        private IHttpContextAccessor _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         public RabbitMQDealJanus(IHttpContextAccessor httpContextAccessor) 
         {
             _httpContextAccessor = httpContextAccessor;
