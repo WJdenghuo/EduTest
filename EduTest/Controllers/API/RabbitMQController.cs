@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Edu.Tools;
+using EduTest.Models.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,7 @@ namespace EduTest.Controllers.API
             _rpcClient = rpcClient;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("RPCTest")]
         public String Test([FromForm][FromBody]DealCommand dealCommand)
         {

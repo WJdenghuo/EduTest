@@ -1,8 +1,5 @@
 ﻿using Edu.Models.Models;
-using Edu.Tools;
-using EduTest.Controllers.API;
 using EduTest.Models.Models;
-using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
@@ -11,42 +8,17 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Receive
+namespace Edu.Tools
 {
-    class MyService : IHostedService
-    { /// <summary>
-      /// 服务启动 /// </summary>
-      /// <param name="cancellationToken"></param>
-      /// <returns></returns>
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            return Task.Run(() =>
-            {
-                Console.WriteLine("控制台程序已经开启"); //模拟定时需要后台处理的任务
-                new Task(() =>
-                {
-                    Start();
-
-                }).Start();
-
-            });
-        } 
-        /// <summary>
-        /// 服务停止 /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.Run(() =>
-            {
-                Console.WriteLine("控制台程序已经停止");
-            });
-
-        }
-        public void Start()
+    public class RpcServer
+    {
+        private readonly IConnection connection;
+        private readonly IModel channel;
+        private readonly string replyQueueName;
+        private readonly EventingBasicConsumer consumer;
+        private readonly IBasicProperties props;
+        public RpcServer() 
         {
             //生产项目的话，把这块逻辑抽出来，增加重试策略（policy）
             var factory = new ConnectionFactory()
@@ -57,54 +29,55 @@ namespace Receive
                 AutomaticRecoveryEnabled = true,
                 TopologyRecoveryEnabled = true
             };
-            using (var connection = factory.CreateConnection(new string[]
+            connection = factory.CreateConnection(new string[]
                 {
                 "49.233.130.117",
                 "62.234.105.58"
-                }))
-            using (var channel = connection.CreateModel())
-            {
-                channel.QueueDeclare(queue: "rpc_queue", durable: false,
+                });
+            channel = connection.CreateModel();
+            channel.QueueDeclare(queue: "rpc_queue", durable: false,
                   exclusive: false, autoDelete: false, arguments: null);
-                channel.BasicQos(0, 1, false);
-                var consumer = new EventingBasicConsumer(channel);
-                channel.BasicConsume(queue: "rpc_queue",
-                  autoAck: false, consumer: consumer);
-                Console.WriteLine(" [x] Awaiting RPC requests");
+            channel.BasicQos(0, 1, false);
+            consumer = new EventingBasicConsumer(channel);
+            channel.BasicConsume(queue: "rpc_queue",
+              autoAck: false, consumer: consumer);
+            Console.WriteLine(" [x] Awaiting RPC requests");
 
-                consumer.Received += (model, ea) =>
+            consumer.Received += (model, ea) =>
+            {
+                string response = null;
+
+                var body = ea.Body;
+                var props = ea.BasicProperties;
+                var replyProps = channel.CreateBasicProperties();
+                replyProps.CorrelationId = props.CorrelationId;
+
+                try
                 {
-                    string response = null;
+                    var message = Encoding.UTF8.GetString(body);
 
-                    var body = ea.Body;
-                    var props = ea.BasicProperties;
-                    var replyProps = channel.CreateBasicProperties();
-                    replyProps.CorrelationId = props.CorrelationId;
-
-                    try
-                    {
-                        var message = Encoding.UTF8.GetString(body);
-
-                        Console.WriteLine($"receive message{message}");
-                        //response = GetDealed(message);
-                        response = message;
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(" [.] " + e.Message);
-                        response = "";
-                    }
-                    finally
-                    {
-                        var responseBytes = Encoding.UTF8.GetBytes(response);
-                        channel.BasicPublish(exchange: "", routingKey: props.ReplyTo,
-                          basicProperties: replyProps, body: responseBytes);
-                        channel.BasicAck(deliveryTag: ea.DeliveryTag,
-                          multiple: false);
-                    }
-                };
-            }
-           
+                    Console.WriteLine($"receive message{message}");
+                    response = GetDealed(message);
+                    //response = message;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(" [.] " + e.Message);
+                    response = "";
+                }
+                finally
+                {
+                    var responseBytes = Encoding.UTF8.GetBytes(response);
+                    channel.BasicPublish(exchange: "", routingKey: props.ReplyTo,
+                      basicProperties: replyProps, body: responseBytes);
+                    channel.BasicAck(deliveryTag: ea.DeliveryTag,
+                      multiple: false);
+                }
+            };
+        }
+        public void Close()
+        {
+            connection.Close();
         }
         static String GetDealed(String dec)
         {
@@ -178,7 +151,7 @@ namespace Receive
                         listPath.Add(x.FileName);
                     });
                 }
-                
+
             }
             else
             {

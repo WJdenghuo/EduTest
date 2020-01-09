@@ -29,7 +29,7 @@ namespace Edu.Tools
 
             connection = factory.CreateConnection(new string[]
             {
-                    "106.13.116.83",
+                    "49.233.130.117",
                     "62.234.105.58"
             });
             channel = connection.CreateModel();

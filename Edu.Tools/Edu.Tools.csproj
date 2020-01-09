@@ -19,4 +19,8 @@
     <Folder Include="HttpCilent\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Edu.Models\Edu.Models.csproj" />
+  </ItemGroup>
+
 </Project>

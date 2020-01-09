@@ -6,6 +6,7 @@ using RabbitMQ.Client.Events;
 using Edu.Tools;
 using EduTest.Controllers.API;
 using System.Collections.Concurrent;
+using EduTest.Models.Models;
 
 namespace Send
 {

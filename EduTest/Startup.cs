@@ -134,7 +134,8 @@ namespace EduTest
                 configuration.ResolveDns = true;
                 return ConnectionMultiplexer.Connect(configuration);
             });
-            services.AddHostedService<TimedHostedService>();
+            //services.AddHostedService<TimedHostedService>();
+            services.AddHostedService<RabbitHostedService>();
 
             JWTTokenOptions jwtTokenOptions = new JWTTokenOptions();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

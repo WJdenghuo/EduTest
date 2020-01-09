@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EduTest.Controllers.API
+namespace EduTest.Models.Models
 {
     public class DealCommand
     {
