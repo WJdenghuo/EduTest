@@ -47,7 +47,7 @@ namespace EduTest.Controllers.API
         /// </summary>
         /// <param name="path">路径</param>
         /// <returns>文件流</returns>
-        [HttpPost]
+        [HttpGet]
         [Route("Download")]
         public async Task<HttpResponseMessage> Download(String path)
         {

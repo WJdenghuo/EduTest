@@ -29,8 +29,10 @@ namespace Edu.Service
             {
                 return new HttpResponseMessage(HttpStatusCode.NoContent);
             }
-            FileStream fileStream = File.OpenRead(path);
-            httpResponseMessage.Content = new StreamContent(fileStream);
+            //FileStream fileStream = File.OpenRead(path);
+            FileStream fs = new FileStream(path, FileMode.OpenOrCreate);
+            fs.Close();
+            httpResponseMessage.Content = new StreamContent(fs);
             httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
             //httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("video/webm");
             httpResponseMessage.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
