@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Edu.Service.Service;
 using Edu.Tools;
 using EduTest.Models.Models;
 using Microsoft.AspNetCore.Http;
@@ -12,18 +13,18 @@ using Microsoft.Extensions.Logging;
 
 namespace EduTest.Controllers.API
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
-    public class RabbitMQController : ControllerBase
+    public class JanusFileDealController : ControllerBase
     {
         private readonly ILogger _logger;
         private readonly RpcClient _rpcClient;
-        private readonly Edu.Service.Service.RabbitMQ _rabbitMQ;
-        public RabbitMQController(ILogger<RabbitMQController> logger, RpcClient rpcClient, Edu.Service.Service.RabbitMQ rabbitMQ)
+        private readonly RabbitMQDealJanus _rabbitMQDealJanus;
+        public JanusFileDealController(ILogger<JanusFileDealController> logger, RpcClient rpcClient, RabbitMQDealJanus rabbitMQDealJanus)
         {
             _logger = logger;
             _rpcClient = rpcClient;
-            _rabbitMQ = rabbitMQ;
+            _rabbitMQDealJanus = rabbitMQDealJanus;
         }
 
         [HttpPost]
@@ -49,7 +50,7 @@ namespace EduTest.Controllers.API
         [HttpPost]
         public async Task<HttpResponseMessage> Download(String path)
         {
-            return await _rabbitMQ.DownloadAsync(path);
+            return await _rabbitMQDealJanus.DownloadAsync(path);
         }
     }
 }

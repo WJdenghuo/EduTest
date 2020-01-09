@@ -12,10 +12,10 @@ using System.Web;
 
 namespace Edu.Service.Service
 {
-    public class RabbitMQ : IRabbitMQ
+    public class RabbitMQDealJanus : IRabbitMQDealJanus
     {
         private IHttpContextAccessor _httpContextAccessor;
-        public RabbitMQ(IHttpContextAccessor httpContextAccessor) 
+        public RabbitMQDealJanus(IHttpContextAccessor httpContextAccessor) 
         {
             _httpContextAccessor = httpContextAccessor;
         }

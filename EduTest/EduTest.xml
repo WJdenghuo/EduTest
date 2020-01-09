@@ -26,7 +26,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:EduTest.Controllers.API.RabbitMQController.Download(System.String)">
+        <member name="M:EduTest.Controllers.API.JanusFileDealController.Download(System.String)">
             <summary>
             webm文件获取
             </summary>

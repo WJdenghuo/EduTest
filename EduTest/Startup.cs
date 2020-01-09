@@ -10,6 +10,7 @@ using Edu.Service;
 using Edu.Service.Admin;
 using Edu.Service.IService;
 using Edu.Service.MediatR;
+using Edu.Service.Service;
 using Edu.Tools;
 using Edu.Tools.Redis;
 using EduTest.Hubs;
@@ -123,7 +124,7 @@ namespace EduTest
             services.AddTransient(typeof(IAsyncRepository<>), typeof(SugarRepository<>));
             services.AddTransient(typeof(IRepository<>), typeof(SugarRepository<>));
             services.AddScoped<IAccount, Account>();
-            services.AddScoped<IRabbitMQ, Edu.Service.Service.RabbitMQ>();
+            services.AddScoped<IRabbitMQDealJanus, RabbitMQDealJanus>();
             services.AddSingleton<IEsClientProvider, EsClientProvider>();
             services.AddMediatR(typeof(PingHandler).Assembly,
                                 typeof(Pong1).Assembly, typeof(Pong2).Assembly);
@@ -297,7 +298,7 @@ namespace EduTest
             //app.UseIpRateLimiting();
 
             //中间件测试
-            app.UseRequestUser();
+            //app.UseRequestUser();
             //app.Use(async (context, next) =>
             //{
             //    if (context.Request.Path == "/ws")

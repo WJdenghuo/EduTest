@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Edu.Service.IService
 {
-    public interface IRabbitMQ
+    public interface IRabbitMQDealJanus
     {
         Task<HttpResponseMessage> DownloadAsync(String path);
     }
