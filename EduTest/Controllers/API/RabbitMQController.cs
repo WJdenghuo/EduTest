@@ -41,6 +41,12 @@ namespace EduTest.Controllers.API
            
             return response;
         }
+        /// <summary>
+        /// webm文件获取
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <returns>文件流</returns>
+        [HttpPost]
         public async Task<HttpResponseMessage> Download(String path)
         {
             return await _rabbitMQ.DownloadAsync(path);

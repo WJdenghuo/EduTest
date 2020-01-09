@@ -26,6 +26,13 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:EduTest.Controllers.API.RabbitMQController.Download(System.String)">
+            <summary>
+            webm文件获取
+            </summary>
+            <param name="path">路径</param>
+            <returns>文件流</returns>
+        </member>
         <member name="T:EduTest.Controllers.API.TestController">
             <summary>
             测试xml注释文件(controller)
