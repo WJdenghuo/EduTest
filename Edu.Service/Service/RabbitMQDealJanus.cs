@@ -31,8 +31,8 @@ namespace Edu.Service
             }
             FileStream fileStream = File.OpenRead(path);
             httpResponseMessage.Content = new StreamContent(fileStream);
-            //httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-            httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("video/webm");
+            httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            //httpResponseMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("video/webm");
             httpResponseMessage.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
             {
                 FileName =
