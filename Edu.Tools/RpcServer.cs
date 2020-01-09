@@ -15,9 +15,7 @@ namespace Edu.Tools
     {
         private readonly IConnection connection;
         private readonly IModel channel;
-        private readonly string replyQueueName;
         private readonly EventingBasicConsumer consumer;
-        private readonly IBasicProperties props;
         public RpcServer() 
         {
             //生产项目的话，把这块逻辑抽出来，增加重试策略（policy）
@@ -112,7 +110,7 @@ namespace Edu.Tools
                         FileName = x,
                         RoomID = media[1],
                         UserID = media[3],
-                        CreateTricks = Int64.TryParse(media[5][0..^3], out long result) ? result : DateTime.UtcNow.Ticks
+                        CreateTricks = Int64.TryParse(media[4][0..^3], out long result) ? result : DateTime.UtcNow.Ticks
                     });
                 });
             if (dealCommand.All)

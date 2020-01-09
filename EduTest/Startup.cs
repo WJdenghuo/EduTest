@@ -8,6 +8,7 @@ using Edu.Models.Data;
 using Edu.Models.Models;
 using Edu.Service;
 using Edu.Service.Admin;
+using Edu.Service.IService;
 using Edu.Service.MediatR;
 using Edu.Tools;
 using Edu.Tools.Redis;
@@ -122,6 +123,7 @@ namespace EduTest
             services.AddTransient(typeof(IAsyncRepository<>), typeof(SugarRepository<>));
             services.AddTransient(typeof(IRepository<>), typeof(SugarRepository<>));
             services.AddScoped<IAccount, Account>();
+            services.AddScoped<IRabbitMQ, Edu.Service.Service.RabbitMQ>();
             services.AddSingleton<IEsClientProvider, EsClientProvider>();
             services.AddMediatR(typeof(PingHandler).Assembly,
                                 typeof(Pong1).Assembly, typeof(Pong2).Assembly);

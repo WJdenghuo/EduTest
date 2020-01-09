@@ -18,10 +18,12 @@ namespace EduTest.Controllers.API
     {
         private readonly ILogger _logger;
         private readonly RpcClient _rpcClient;
-        public RabbitMQController(ILogger<RabbitMQController> logger, RpcClient rpcClient)
+        private readonly Edu.Service.Service.RabbitMQ _rabbitMQ;
+        public RabbitMQController(ILogger<RabbitMQController> logger, RpcClient rpcClient, Edu.Service.Service.RabbitMQ rabbitMQ)
         {
             _logger = logger;
             _rpcClient = rpcClient;
+            _rabbitMQ = rabbitMQ;
         }
 
         [HttpPost]
@@ -38,6 +40,10 @@ namespace EduTest.Controllers.API
             var response = _rpcClient.Call(body);
            
             return response;
+        }
+        public async Task<HttpResponseMessage> Download(String path)
+        {
+            return await _rabbitMQ.DownloadAsync(path);
         }
     }
 }
