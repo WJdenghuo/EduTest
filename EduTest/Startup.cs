@@ -108,7 +108,7 @@ namespace EduTest
             services.AddSingleton<IEsClientProvider, EsClientProvider>();
             services.AddMediatR(typeof(PingHandler).Assembly,
                                 typeof(Pong1).Assembly, typeof(Pong2).Assembly);
-            services.AddSingleton<RpcClient>();
+            //services.AddSingleton<RpcClient>();
             services.AddSingleton<ConnectionMultiplexer>(sp =>
             {
                 var settings = sp.GetRequiredService<IOptions<RedisSetting>>().Value;
@@ -118,7 +118,7 @@ namespace EduTest
                 return ConnectionMultiplexer.Connect(configuration);
             });
             //services.AddHostedService<TimedHostedService>();
-            services.AddHostedService<RabbitHostedService>();
+            //services.AddHostedService<RabbitHostedService>();
 
             JWTTokenOptions jwtTokenOptions = new JWTTokenOptions();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
