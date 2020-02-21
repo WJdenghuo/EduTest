@@ -28,8 +28,8 @@ namespace EduTest.Controllers.API
         [HttpGet]
         public IActionResult UploadMediaToCloud() 
         {
-            VodUploadClient client = new VodUploadClient("AKIDVaTCKjWC5nVyC95NbZWO0McWBcnumAXv",
-                "KSKOD7pIZv5zvXHy4NfiZejllFysjrTs");
+            VodUploadClient client = new VodUploadClient("*",
+                "*");
 
             VodUploadRequest request = new VodUploadRequest
             {
