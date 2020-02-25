@@ -24,7 +24,7 @@ namespace Edu.Models.Models
     public class MetaData 
     { 
         public int AudioDuration { get; set; }
-        public AudioStreamSet AudioStreamSet { get; set; }
+        public List<AudioStreamSet>  AudioStreamSet { get; set; }
         public int Bitrate { get; set; }
         public string Container { get; set; }
         public int Duration { get; set; }
@@ -32,7 +32,7 @@ namespace Edu.Models.Models
         public int Rotate { get; set; }
         public int Size { get; set; }
         public int VideoDuration { get; set; }
-        public VideoStreamSet VideoStreamSet { get; set; }
+        public List<VideoStreamSet>  VideoStreamSet { get; set; }
         public int Width { get; set; }
     }
     public class AudioStreamSet 
