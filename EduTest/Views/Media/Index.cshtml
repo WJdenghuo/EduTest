@@ -1,0 +1,37 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+<link href="//imgcache.qq.com/open/qcloud/video/tcplayer/tcplayer.css" rel="stylesheet">
+<!--如果需要在 Chrome 和 Firefox 等现代浏览器中通过 H5 播放 HLS 和 Dash 格式的视频，需要在 tcplayer.min.js 之前引入 hls.js 和 dash.js。-->
+<script src="//imgcache.qq.com/open/qcloud/video/tcplayer/libs/hls.min.0.12.4.js"></script>
+<script src="//imgcache.qq.com/open/qcloud/video/tcplayer/libs/dash.all.min.2.9.3.js"></script>
+<!--播放器脚本文件-->
+<script src="//imgcache.qq.com/open/qcloud/video/tcplayer/tcplayer.min.js"></script>
+
+<video id="player-container-id" width="414" height="270" preload="auto" playsinline webkit-playsinline>
+</video>
+
+<script>
+    var player = TCPlayer('player-container-id', { // player-container-id 为播放器容器 ID，必须与 html 中一致
+            fileID: '5285890799031776870', // 请传入需要播放的视频 filID（必须）
+            appID: '1256906399' // 请传入点播账号的 appID（必须）
+    });
+    player.ready(function () {
+        var timer = null;
+        timer=window.setInterval(function () {
+            console.log("时长：" + player.duration() + "当前时间(s):" + player.currentTime());
+            
+            //$.get("", {}, function () {
+
+            //})
+            if (player.duration() == player.currentTime()) {
+                window.clearInterval(timer);
+            }
+        }, 5000);
+        player.on('progress', function (e) { console.log(e) });
+        player.on('ended', function () { console.log("学习完毕") });
+    })
+        
+</script>
+

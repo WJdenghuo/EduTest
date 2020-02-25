@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Edu.Models.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -17,10 +20,16 @@ namespace EduTest.Controllers.API
     public class CloudMediaController : ControllerBase
     {
         private readonly ILogger _logger;
-        public CloudMediaController(ILogger<CloudMediaController> logger)
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public CloudMediaController(ILogger<CloudMediaController> logger,
+            IWebHostEnvironment hostingEnvironment,
+            IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
-        }
+            _hostingEnvironment = hostingEnvironment;
+            _httpContextAccessor = httpContextAccessor;
+    }
         /// <summary>
         /// 云点播-媒体文件存储测试
         /// </summary>
@@ -31,32 +40,48 @@ namespace EduTest.Controllers.API
             VodUploadClient client = new VodUploadClient("*",
                 "*");
 
-            VodUploadRequest request = new VodUploadRequest
+            var urlPath = "/media/test.mp4";
+
+            string webRootPath = _hostingEnvironment.WebRootPath.Replace('\\', '/');
+            string contentRootPath = _hostingEnvironment.ContentRootPath.Replace('\\', '/');
+            String path = webRootPath + urlPath;
+            if (System.IO.File.Exists(path))
             {
-                MediaFilePath = "/media/test.mp4",
-                //CoverFilePath = "/data/videos/Wildlife.jpg"
-            };
-            try
-            {
-                VodUploadResponse response = client.Upload("ap-beijing", request);
-                // 打印媒体 FileId
-                Console.WriteLine(response.FileId);
+                VodUploadRequest request = new VodUploadRequest
+                {
+                    MediaFilePath = path,
+                    //CoverFilePath = "/data/videos/Wildlife.jpg"
+                    Procedure= "Adaptive stream"
+                };
+                try
+                {
+                    VodUploadResponse response = client.Upload("ap-beijing", request);
+                    // 打印媒体 FileId
+                    Console.WriteLine(response.FileId);
+                }
+                catch (Exception e)
+                {
+                    // 业务方进行异常处理
+                    Console.WriteLine(e);
+                }
             }
-            catch (Exception e)
+            else
             {
-                // 业务方进行异常处理
-                Console.WriteLine(e);
+
             }
+           
             return Ok();
         }
         /// <summary>
         /// 接收回调
         /// </summary>
-        /// <param name="cloudMediaMessage"></param>
         [HttpPost]
-        public void CloudCallBack([FromBody]String cloudMediaMessage)
+        public void CloudCallBack([FromBody] Procedure procedure)
         {
-            _logger.LogInformation($"上传回调消息：{cloudMediaMessage}");
+            var reader = new StreamReader(Request.Body);
+            var contentFromBody = reader.ReadToEndAsync();
+            _logger.LogInformation($"上传回调消息：{contentFromBody}");
+            _logger.LogInformation($"上传回调消息frombody反序列化成功：{procedure.EventType}");
         }
 
     }
